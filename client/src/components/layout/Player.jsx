@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Shuffle, SkipBack, SkipForward, Play, Pause, Repeat, Repeat1, Heart, Volume2, ListMusic } from 'lucide-react'
 import { usePlayer } from '../../context/PlayerContext'
+import { formatTime } from '../../utils/formatTime'
 
 // Small reusable button so we don't repeat these classes 7 times
 function IconButton({ icon: Icon, label, active = false, size = 20, onClick }) {
@@ -23,14 +24,19 @@ function Player() {
         isPlaying,
         isShuffle,
         repeatMode,
+        progress,
+        duration,
         togglePlay,
         playNext,
         playPrevious,
         toggleShuffle,
         cycleRepeat,
+        seek,
     } = usePlayer()
     // Liking stays local for now; it moves to the backend in Phase 10
     const [isLiked, setIsLiked] = useState(false)
+    // How far through the song we are, as a percentage (guard against dividing by 0)
+    const percent = duration ? (progress / duration) * 100 : 0
 
     // Nothing chosen yet: show a quiet empty state
     if (!currentTrack) {
@@ -101,13 +107,20 @@ function Player() {
                 </div>
 
                 {/* Progress bar: hidden on the smallest screens; static for now */}
+                {/* Progress bar: a range input, so click and drag work for free */}
                 <div className="hidden w-full max-w-xl items-center gap-2 text-xs text-ink-300 md:flex">
-                    <span>1:05</span>
-                    <div className="group h-1 flex-1 rounded-full bg-surface-600">
-                        {/* The filled part: width is a percentage of the track */}
-                        <div className="h-full w-1/3 rounded-full bg-ink-100 transition-colors group-hover:bg-brand-400" />
-                    </div>
-                    <span>{currentTrack.duration ?? '3:30'}</span>
+                    <span className="w-10 text-right">{formatTime(progress)}</span>
+                    <input
+                        type="range"
+                        min={0}
+                        max={duration || 0}
+                        step={0.1}
+                        value={progress}
+                        onChange={(e) => seek(Number(e.target.value))}
+                        aria-label="Seek"
+                        className="h-1 flex-1 cursor-pointer accent-brand-400"
+                    />
+                    <span className="w-10">{formatTime(duration)}</span>
                 </div>
             </div>
 
@@ -122,7 +135,7 @@ function Player() {
 
             {/* Thin progress line: phones only (desktop has the full bar) */}
             <div className="absolute inset-x-0 bottom-0 h-0.5 bg-surface-600 md:hidden">
-                <div className="h-full w-1/3 bg-brand-400" />
+                <div className="h-full bg-brand-400" style={{ width: `${percent}%` }} />
             </div>
         </div>
     )

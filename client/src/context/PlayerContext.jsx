@@ -1,20 +1,35 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 
 const PlayerContext = createContext(null)
 
 export function PlayerProvider({ children }) {
-  // The ordered list of tracks and our position in it
   const [queue, setQueue] = useState([])
-  const [currentIndex, setCurrentIndex] = useState(-1) // -1 = nothing loaded
+  const [currentIndex, setCurrentIndex] = useState(-1)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isShuffle, setIsShuffle] = useState(false)
-  // 'off' | 'all' | 'one'
   const [repeatMode, setRepeatMode] = useState('off')
 
-  // Derived value: no separate state, so it can never go out of sync
+  // NEW: a handle to the real <audio> element, plus time info copied from it
+  const audioRef = useRef(null)
+  const [progress, setProgress] = useState(0) // seconds played
+  const [duration, setDuration] = useState(0) // total seconds
+
   const currentTrack = currentIndex >= 0 ? queue[currentIndex] : null
 
-  // Load a track. "list" is the array it came from; it becomes the queue.
+  // NEW: keep the audio element in sync with isPlaying.
+  // Runs after render whenever isPlaying or the track changes.
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || !currentTrack) return
+
+    if (isPlaying) {
+      // play() returns a promise; it can be rejected (blocked, bad URL)
+      audio.play().catch(() => setIsPlaying(false))
+    } else {
+      audio.pause()
+    }
+  }, [isPlaying, currentTrack])
+
   function playTrack(track, list = [track]) {
     const index = list.findIndex((t) => t.id === track.id)
     setQueue(list)
@@ -31,7 +46,6 @@ export function PlayerProvider({ children }) {
     if (queue.length === 0) return
 
     if (isShuffle && queue.length > 1) {
-      // Pick a random index that is not the current one
       let random = currentIndex
       while (random === currentIndex) {
         random = Math.floor(Math.random() * queue.length)
@@ -39,12 +53,10 @@ export function PlayerProvider({ children }) {
       setCurrentIndex(random)
     } else {
       const isLast = currentIndex === queue.length - 1
-      // At the end with repeat off: stop instead of looping
       if (isLast && repeatMode === 'off') {
         setIsPlaying(false)
         return
       }
-      // % wraps back to 0 after the last track
       setCurrentIndex((currentIndex + 1) % queue.length)
     }
     setIsPlaying(true)
@@ -52,7 +64,6 @@ export function PlayerProvider({ children }) {
 
   function playPrevious() {
     if (queue.length === 0) return
-    // + queue.length avoids a negative index when going back from 0
     setCurrentIndex((currentIndex - 1 + queue.length) % queue.length)
     setIsPlaying(true)
   }
@@ -61,9 +72,27 @@ export function PlayerProvider({ children }) {
     setIsShuffle((prev) => !prev)
   }
 
-  // Cycle: off -> all -> one -> off
   function cycleRepeat() {
     setRepeatMode((prev) => (prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off'))
+  }
+
+  // NEW: jump to a time (in seconds) when the user drags the progress bar
+  function seek(time) {
+    if (!audioRef.current) return
+    audioRef.current.currentTime = time
+    setProgress(time)
+  }
+
+  // NEW: called when a song finishes
+  function handleEnded() {
+    const audio = audioRef.current
+    // Repeat one (or repeat all with a single-song queue): restart the same song
+    if (repeatMode === 'one' || (repeatMode === 'all' && queue.length === 1)) {
+      audio.currentTime = 0
+      audio.play()
+    } else {
+      playNext()
+    }
   }
 
   const value = {
@@ -72,15 +101,30 @@ export function PlayerProvider({ children }) {
     isPlaying,
     isShuffle,
     repeatMode,
+    progress,
+    duration,
     playTrack,
     togglePlay,
     playNext,
     playPrevious,
     toggleShuffle,
     cycleRepeat,
+    seek,
   }
 
-  return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>
+  return (
+    <PlayerContext.Provider value={value}>
+      {children}
+      {/* NEW: the one real audio element, invisible. React updates src when the track changes. */}
+      <audio
+        ref={audioRef}
+        src={currentTrack?.audioUrl}
+        onTimeUpdate={(e) => setProgress(e.currentTarget.currentTime)}
+        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+        onEnded={handleEnded}
+      />
+    </PlayerContext.Provider>
+  )
 }
 
 export function usePlayer() {
