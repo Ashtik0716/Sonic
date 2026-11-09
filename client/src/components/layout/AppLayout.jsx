@@ -2,33 +2,33 @@ import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Navbar from './Navbar'
 import Player from './Player'
+import MobileNav from './MobileNav'
 
 function AppLayout() {
-    return (
-        // Full-screen column: top area grows, player stays at the bottom
-        <div className="flex h-full flex-col bg-surface-950">
-            {/* min-h-0 lets this row shrink so the main area can scroll */}
-            <div className="flex min-h-0 flex-1 gap-2 p-2 pb-0">
-                <Sidebar />
+  return (
+    <div className="flex h-full flex-col bg-surface-950">
+      <div className="flex min-h-0 flex-1 gap-2 md:p-2 md:pb-0">
+        <Sidebar />
 
-                {/* No padding here, so the sticky Navbar sits flush at the top */}
-                <main className="flex-1 overflow-y-auto rounded-xl bg-surface-900">
-                    <Navbar />
+        <main className="flex-1 overflow-y-auto bg-linear-to-b from-brand-600/25 via-surface-900 via-40% to-surface-900 md:rounded-xl">
+          <Navbar />
 
-                    {/* Padding lives here instead, around the page content */}
-                    <div className="px-6 pb-6">
-                        <Outlet />
-                    </div>
-                </main>
-            </div>
+          {/* px-4 on phones, px-6 from md up */}
+          <div className="px-4 pb-6 md:px-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
 
-            {/* Player placeholder: fixed height, always visible */}
-            {/* Player: fixed height, always visible */}
-            <footer className="h-24 shrink-0 p-2">
-                <Player />
-            </footer>
-        </div>
-    )
+      {/* Slimmer player on phones (h-20), taller on desktop (h-24) */}
+      <footer className="h-20 shrink-0 p-2 md:h-24">
+        <Player />
+      </footer>
+
+      {/* Tab bar sits below the player, phones only */}
+      <MobileNav />
+    </div>
+  )
 }
 
 export default AppLayout

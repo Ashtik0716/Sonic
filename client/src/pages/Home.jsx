@@ -19,18 +19,19 @@ function Home() {
       <h1 className="text-3xl font-extrabold tracking-tight">{getGreeting()}</h1>
 
       {/* Quick picks: first 6 tracks, sliced from the array */}
-      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-4 grid grid-cols-2 gap-2 md:mt-6 md:gap-3 lg:grid-cols-3">
         {trendingTracks.slice(0, 6).map((track) => (
           <div
-            key={track.id}
-            className="group flex cursor-pointer items-center gap-4 overflow-hidden rounded-lg bg-surface-700/60 pr-4 transition hover:bg-surface-600"
-          >
-            <img src={track.cover} alt="" className="h-16 w-16 object-cover" />
-            <span className="flex-1 truncate font-semibold">{track.title}</span>
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500 opacity-0 shadow-lg transition group-hover:opacity-100">
-              <Play size={18} className="ml-0.5 fill-current" />
-            </span>
-          </div>
+  key={track.id}
+  className="group flex cursor-pointer items-center gap-3 overflow-hidden rounded-lg bg-surface-700/60 pr-2 transition hover:bg-surface-600 md:gap-4 md:pr-4"
+>
+  <img src={track.cover} alt="" className="h-14 w-14 shrink-0 object-cover md:h-16 md:w-16" />
+  {/* line-clamp-2 allows two lines before cutting off with "..." */}
+  <span className="line-clamp-2 flex-1 text-sm font-semibold md:text-base">{track.title}</span>
+  <span className="hidden h-10 w-10 items-center justify-center rounded-full bg-brand-500 opacity-0 shadow-lg transition group-hover:opacity-100 md:flex">
+    <Play size={18} className="ml-0.5 fill-current" />
+  </span>
+</div>
         ))}
       </div>
 
