@@ -12,6 +12,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
         <Route path="/library" element={<Library />} />
+        <Route path="/library" element={<Library />} />
+        <Route path="/library/*" element={<Library />} />
       </Route>
     </Routes>
   )
