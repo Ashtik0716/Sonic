@@ -17,6 +17,11 @@ function getGreeting() {
 function Home() {
     const { playTrack } = usePlayer()
     const quickPicks = trendingTracks.slice(0, 6)
+    // Interim: play every Trending track by this artist (replaced by real pages later)
+function playByArtist(name) {
+  const list = trendingTracks.filter((t) => t.artist === name)
+  if (list.length > 0) playTrack(list[0], list)
+}
     return (
         <div>
             <h1 className="text-3xl font-extrabold tracking-tight">{getGreeting()}</h1>
@@ -26,7 +31,7 @@ function Home() {
                 {quickPicks.map((track) => (
                     <div
                         key={track.id}
-                        onClick={() => playTrack(track)}
+                        onClick={() => playTrack(track, quickPicks)}
                         className="group flex cursor-pointer items-center gap-3 ..."
                     >
                         <img src={track.cover} alt="" className="h-14 w-14 shrink-0 object-cover md:h-16 md:w-16" />
@@ -47,13 +52,13 @@ function Home() {
 
             <Section title="Popular albums">
                 {popularAlbums.map((album) => (
-                    <AlbumCard key={album.id} album={album} />
+                    <AlbumCard key={album.id} album={album} onPlay={() => playByArtist(album.artist)} />
                 ))}
             </Section>
 
             <Section title="Featured artists">
                 {featuredArtists.map((artist) => (
-                    <ArtistCard key={artist.id} artist={artist} />
+                    <ArtistCard key={artist.id} artist={artist} onPlay={() => playByArtist(artist.name)} />
                 ))}
             </Section>
         </div>

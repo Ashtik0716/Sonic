@@ -1,7 +1,10 @@
 // Same idea as TrackCard, but shows the year under the title
-function AlbumCard({ album }) {
+function AlbumCard({ album, onPlay }) {
   return (
-    <div className="group w-44 shrink-0 cursor-pointer rounded-xl bg-surface-800 p-3 transition hover:bg-surface-700">
+    <div
+      onClick={onPlay}
+      className="group w-36 shrink-0 cursor-pointer rounded-xl bg-surface-800 p-3 transition hover:bg-surface-700 md:w-44"
+    >
       <img
         src={album.cover}
         alt={`${album.title} cover`}

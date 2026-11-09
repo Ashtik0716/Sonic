@@ -46,6 +46,50 @@ export function PlayerProvider({ children }) {
         audio.muted = isMuted
     }, [volume, isMuted, currentTrack])
 
+    // Tell the OS what is playing (title, artist, artwork)
+    useEffect(() => {
+        if (!('mediaSession' in navigator) || !currentTrack) return
+
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: currentTrack.title,
+            artist: currentTrack.artist,
+            artwork: [{ src: currentTrack.cover, sizes: '400x400', type: 'image/jpeg' }],
+        })
+    }, [currentTrack])
+
+    // Tell the OS which buttons work and what they do
+    useEffect(() => {
+        if (!('mediaSession' in navigator)) return
+
+        const session = navigator.mediaSession
+        session.setActionHandler('play', () => setIsPlaying(true))
+        session.setActionHandler('pause', () => setIsPlaying(false))
+        session.setActionHandler('nexttrack', playNext)
+        session.setActionHandler('previoustrack', playPrevious)
+        session.setActionHandler('seekto', (details) => seek(details.seekTime))
+
+        // Cleanup: remove handlers if the provider ever unmounts
+        return () => {
+            ;['play', 'pause', 'nexttrack', 'previoustrack', 'seekto'].forEach((action) =>
+                session.setActionHandler(action, null)
+            )
+        }
+    })
+
+    // Report position so the lock-screen scrubber is accurate
+    useEffect(() => {
+        if (!('mediaSession' in navigator) || !duration) return
+        try {
+            navigator.mediaSession.setPositionState({
+                duration,
+                position: Math.min(progress, duration),
+                playbackRate: 1,
+            })
+        } catch {
+            // Some browsers throw on invalid values; safe to ignore
+        }
+    }, [progress, duration])
+
     function playTrack(track, list = [track]) {
         const index = list.findIndex((t) => t.id === track.id)
         setQueue(list)
@@ -123,25 +167,25 @@ export function PlayerProvider({ children }) {
     }
 
     const value = {
-  queue,
-  currentTrack,
-  isPlaying,
-  isShuffle,
-  repeatMode,
-  progress,
-  duration,
-  volume,
-  isMuted,
-  playTrack,
-  togglePlay,
-  playNext,
-  playPrevious,
-  toggleShuffle,
-  cycleRepeat,
-  seek,
-  setVolume,
-  toggleMute,
-}
+        queue,
+        currentTrack,
+        isPlaying,
+        isShuffle,
+        repeatMode,
+        progress,
+        duration,
+        volume,
+        isMuted,
+        playTrack,
+        togglePlay,
+        playNext,
+        playPrevious,
+        toggleShuffle,
+        cycleRepeat,
+        seek,
+        setVolume,
+        toggleMute,
+    }
 
     return (
         <PlayerContext.Provider value={value}>
