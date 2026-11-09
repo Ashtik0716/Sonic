@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { Shuffle, SkipBack, SkipForward, Play, Pause, Repeat, Repeat1, Heart, Volume2, ListMusic } from 'lucide-react'
+import {
+    Shuffle, SkipBack, SkipForward, Play, Pause, Repeat, Repeat1,
+    Heart, Volume1, Volume2, VolumeX, ListMusic,
+} from 'lucide-react'
 import { usePlayer } from '../../context/PlayerContext'
 import { formatTime } from '../../utils/formatTime'
 
@@ -20,23 +23,31 @@ function IconButton({ icon: Icon, label, active = false, size = 20, onClick }) {
 function Player() {
     // Read shared state from context instead of keeping our own
     const {
-        currentTrack,
-        isPlaying,
-        isShuffle,
-        repeatMode,
-        progress,
-        duration,
-        togglePlay,
-        playNext,
-        playPrevious,
-        toggleShuffle,
-        cycleRepeat,
-        seek,
-    } = usePlayer()
+  currentTrack,
+  isPlaying,
+  isShuffle,
+  repeatMode,
+  progress,
+  duration,
+  volume,
+  isMuted,
+  togglePlay,
+  playNext,
+  playPrevious,
+  toggleShuffle,
+  cycleRepeat,
+  seek,
+  setVolume,
+  toggleMute,
+} = usePlayer()
     // Liking stays local for now; it moves to the backend in Phase 10
     const [isLiked, setIsLiked] = useState(false)
     // How far through the song we are, as a percentage (guard against dividing by 0)
     const percent = duration ? (progress / duration) * 100 : 0
+
+    // Pick the speaker icon from the current state
+    const effectiveVolume = isMuted ? 0 : volume
+    const VolumeIcon = effectiveVolume === 0 ? VolumeX : effectiveVolume < 0.5 ? Volume1 : Volume2
 
     // Nothing chosen yet: show a quiet empty state
     if (!currentTrack) {
@@ -125,12 +136,25 @@ function Player() {
             </div>
 
             {/* RIGHT: queue + volume (hidden on mobile) */}
+            {/* RIGHT: queue + volume (hidden on mobile) */}
             <div className="hidden items-center justify-end gap-2 md:flex">
                 <IconButton icon={ListMusic} label="Queue" />
-                <Volume2 size={20} className="text-ink-300" />
-                <div className="group h-1 w-24 rounded-full bg-surface-600">
-                    <div className="h-full w-2/3 rounded-full bg-ink-100 transition-colors group-hover:bg-brand-400" />
-                </div>
+                <IconButton
+                    icon={VolumeIcon}
+                    label={isMuted ? 'Unmute' : 'Mute'}
+                    onClick={toggleMute}
+                />
+                <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    // Show 0 while muted so the slider matches what you hear
+                    value={effectiveVolume}
+                    onChange={(e) => setVolume(Number(e.target.value))}
+                    aria-label="Volume"
+                    className="h-1 w-24 cursor-pointer accent-brand-400"
+                />
             </div>
 
             {/* Thin progress line: phones only (desktop has the full bar) */}
