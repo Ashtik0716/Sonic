@@ -1,0 +1,15 @@
+# Dependencies (huge, and reinstallable with npm install)
+node_modules/
+
+# Secrets: never commit these
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+
+# Logs and OS junk
+*.log
+.DS_Store
