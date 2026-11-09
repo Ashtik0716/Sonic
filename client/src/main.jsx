@@ -3,12 +3,15 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
+import { PlayerProvider } from './context/PlayerContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* BrowserRouter lets every component below read and change the URL */}
     <BrowserRouter>
-      <App />
+      {/* Everything inside can now call usePlayer() */}
+      <PlayerProvider>
+        <App />
+      </PlayerProvider>
     </BrowserRouter>
   </StrictMode>,
 )

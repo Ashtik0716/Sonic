@@ -1,16 +1,6 @@
 import { useState } from 'react'
-import {
-    Shuffle,
-    SkipBack,
-    SkipForward,
-    Play,
-    Pause,
-    Repeat,
-    Heart,
-    Volume2,
-    ListMusic,
-} from 'lucide-react'
-import { nowPlaying } from '../../data/mockTracks'
+import { Shuffle, SkipBack, SkipForward, Play, Pause, Repeat, Repeat1, Heart, Volume2, ListMusic } from 'lucide-react'
+import { usePlayer } from '../../context/PlayerContext'
 
 // Small reusable button so we don't repeat these classes 7 times
 function IconButton({ icon: Icon, label, active = false, size = 20, onClick }) {
@@ -27,23 +17,43 @@ function IconButton({ icon: Icon, label, active = false, size = 20, onClick }) {
 }
 
 function Player() {
-    // Local state for now; becomes global state in Phase 4
-    const [isPlaying, setIsPlaying] = useState(false)
+    // Read shared state from context instead of keeping our own
+    const {
+        currentTrack,
+        isPlaying,
+        isShuffle,
+        repeatMode,
+        togglePlay,
+        playNext,
+        playPrevious,
+        toggleShuffle,
+        cycleRepeat,
+    } = usePlayer()
+    // Liking stays local for now; it moves to the backend in Phase 10
     const [isLiked, setIsLiked] = useState(false)
+
+    // Nothing chosen yet: show a quiet empty state
+    if (!currentTrack) {
+        return (
+            <div className="flex h-full items-center justify-center rounded-xl bg-surface-800 px-4 text-sm text-ink-300">
+                Pick a song to start listening
+            </div>
+        )
+    }
 
     return (
         <div className="relative grid h-full grid-cols-[1fr_auto] items-center gap-4 overflow-hidden rounded-xl bg-surface-800 px-4 md:grid-cols-[1fr_2fr_1fr]">
             {/* LEFT: artwork + track info */}
             <div className="flex min-w-0 items-center gap-3">
                 <img
-                    src={nowPlaying.cover}
-                    alt={`${nowPlaying.title} cover`}
+                    src={currentTrack.cover}
+                    alt={`${currentTrack.title} cover`}
                     className="h-14 w-14 shrink-0 rounded-md object-cover"
                 />
                 {/* min-w-0 + truncate: long titles get "..." instead of breaking layout */}
                 <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{nowPlaying.title}</p>
-                    <p className="truncate text-xs text-ink-300">{nowPlaying.artist}</p>
+                    <p className="truncate text-sm font-semibold">{currentTrack.title}</p>
+                    <p className="truncate text-xs text-ink-300">{currentTrack.artist}</p>
                 </div>
                 <button
                     onClick={() => setIsLiked(!isLiked)}
@@ -62,13 +72,13 @@ function Player() {
                 <div className="flex items-center gap-2">
                     {/* Shuffle and repeat are hidden on small screens to save space */}
                     <div className="hidden sm:block">
-                        <IconButton icon={Shuffle} label="Shuffle" />
+                        <IconButton icon={Shuffle} label="Shuffle" active={isShuffle} onClick={toggleShuffle} />
                     </div>
-                    <IconButton icon={SkipBack} label="Previous" size={22} />
+                    <IconButton icon={SkipBack} label="Previous" size={22} onClick={playPrevious} />
 
                     {/* Main play/pause button: icon depends on isPlaying */}
                     <button
-                        onClick={() => setIsPlaying(!isPlaying)}
+                        onClick={togglePlay}
                         aria-label={isPlaying ? 'Pause' : 'Play'}
                         className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-surface-950 transition hover:scale-105"
                     >
@@ -79,9 +89,14 @@ function Player() {
                         )}
                     </button>
 
-                    <IconButton icon={SkipForward} label="Next" size={22} />
+                    <IconButton icon={SkipForward} label="Next" size={22} onClick={playNext} />
                     <div className="hidden sm:block">
-                        <IconButton icon={Repeat} label="Repeat" />
+                        <IconButton
+                            icon={repeatMode === 'one' ? Repeat1 : Repeat}
+                            label="Repeat"
+                            active={repeatMode !== 'off'}
+                            onClick={cycleRepeat}
+                        />
                     </div>
                 </div>
 
@@ -92,7 +107,7 @@ function Player() {
                         {/* The filled part: width is a percentage of the track */}
                         <div className="h-full w-1/3 rounded-full bg-ink-100 transition-colors group-hover:bg-brand-400" />
                     </div>
-                    <span>{nowPlaying.duration}</span>
+                    <span>{currentTrack.duration ?? '3:30'}</span>
                 </div>
             </div>
 

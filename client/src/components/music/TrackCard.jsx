@@ -1,25 +1,50 @@
-import { Play } from 'lucide-react'
+import { Play, Pause } from 'lucide-react'
+import { usePlayer } from '../../context/PlayerContext'
 
-// Props: a track object ({ title, artist, cover })
-function TrackCard({ track }) {
+function TrackCard({ track , list}) {
+  const { currentTrack, isPlaying, playTrack, togglePlay } = usePlayer()
+
+  // Is THIS card's track the one loaded, and is it playing right now?
+  const isCurrent = currentTrack?.id === track.id
+  const isThisPlaying = isCurrent && isPlaying
+
+  function handleClick(event) {
+    // Stop the click bubbling up to the card (useful later when the card links to a page)
+    event.stopPropagation()
+    // Same track: toggle. Different track: load it.
+    if (isCurrent) togglePlay()
+    else playTrack(track, list)
+  }
+
   return (
-    // "group" lets child elements react when the whole card is hovered
-    <div className="group w-44 shrink-0 cursor-pointer rounded-xl bg-surface-800 p-3 transition hover:bg-surface-700">
+    <div className="group w-36 shrink-0 cursor-pointer rounded-xl bg-surface-800 p-3 transition hover:bg-surface-700 md:w-44">
       <div className="relative">
         <img
           src={track.cover}
           alt={`${track.title} cover`}
           className="aspect-square w-full rounded-lg object-cover"
         />
-        {/* Play button: invisible until the card is hovered */}
         <button
-          aria-label={`Play ${track.title}`}
-          className="absolute bottom-2 right-2 flex h-11 w-11 translate-y-2 items-center justify-center rounded-full bg-brand-500 text-white opacity-0 shadow-lg transition group-hover:translate-y-0 group-hover:opacity-100 hover:scale-105"
+          onClick={handleClick}
+          aria-label={isThisPlaying ? `Pause ${track.title}` : `Play ${track.title}`}
+          // Stays visible while this track is playing, otherwise appears on hover
+          className={`absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg transition hover:scale-105 ${
+            isThisPlaying
+              ? 'translate-y-0 opacity-100'
+              : 'translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100'
+          }`}
         >
-          <Play size={20} className="ml-0.5 fill-current" />
+          {isThisPlaying ? (
+            <Pause size={20} className="fill-current" />
+          ) : (
+            <Play size={20} className="ml-0.5 fill-current" />
+          )}
         </button>
       </div>
-      <p className="mt-3 truncate font-semibold">{track.title}</p>
+      {/* Currently loaded track gets a violet title */}
+      <p className={`mt-3 truncate font-semibold ${isCurrent ? 'text-brand-400' : ''}`}>
+        {track.title}
+      </p>
       <p className="truncate text-sm text-ink-300">{track.artist}</p>
     </div>
   )
