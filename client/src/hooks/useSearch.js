@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { searchTracks } from '../services/jamendo'
+import { searchTracks } from '../services/api'
 import { useDebounce } from './useDebounce'
 
 export function useSearch(query) {

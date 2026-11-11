@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { getTrendingTracks } from '../services/jamendo'
+import { getTrendingTracks } from '../services/api'
 
 // Custom hook: fetch trending tracks and report loading / error state
 export function useTrending(limit = 20) {
