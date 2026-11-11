@@ -131,7 +131,7 @@ function Player() {
                         aria-label="Seek"
                         className="h-1 flex-1 cursor-pointer accent-brand-400"
                     />
-                    <span className="w-10">{formatTime(duration)}</span>
+                    <span>{formatTime(duration)}</span>
                 </div>
             </div>
 

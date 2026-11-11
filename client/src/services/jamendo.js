@@ -55,3 +55,14 @@ export async function getTrendingTracks(limit = 20) {
   })
   return results.map(normalizeTrack)
 }
+
+// Search tracks by any text (title, artist, album, tag)
+export async function searchTracks(query, limit = 20) {
+  const results = await request('tracks', {
+    search: query,
+    limit,
+    imagesize: 400,
+    audioformat: 'mp31',
+  })
+  return results.map(normalizeTrack)
+}

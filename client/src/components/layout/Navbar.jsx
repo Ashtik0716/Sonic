@@ -1,9 +1,11 @@
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Search, User } from 'lucide-react'
 
 function Navbar() {
     // useNavigate returns a function we can call to change pages
     const navigate = useNavigate()
+    const location = useLocation()
+    const [searchParams] = useSearchParams()
 
     return (
         // sticky: stays at the top while the page scrolls underneath
@@ -42,7 +44,13 @@ function Navbar() {
                 <input
                     type="text"
                     placeholder="What do you want to play?"
-                    onFocus={() => navigate('/search')}
+                    value={searchParams.get('q') ?? ''}
+                    // Typing sends you to /search?q=...; on the Search page it just updates the URL
+                    onChange={(e) =>
+                        navigate(`/search?q=${encodeURIComponent(e.target.value)}`, {
+                            replace: location.pathname === '/search',
+                        })
+                    }
                     className="h-11 w-full rounded-full bg-surface-700 pl-12 pr-4 text-sm text-ink-100 placeholder:text-ink-500 outline-none transition focus:ring-2 focus:ring-brand-500"
                 />
             </div>
