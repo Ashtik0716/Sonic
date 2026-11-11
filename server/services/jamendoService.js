@@ -65,3 +65,51 @@ export function searchTracks(query, limit = 20) {
     return results.map(normalizeTrack)
   })
 }
+
+// Convert one Jamendo album (with nested tracks) into our shape
+function normalizeAlbum(raw) {
+  return {
+    id: raw.id,
+    title: raw.name,
+    artist: raw.artist_name,
+    artistId: raw.artist_id,
+    cover: raw.image,
+    year: raw.releasedate ? raw.releasedate.slice(0, 4) : '',
+    // Tracks inside an album lack artist and cover, so we fill them in
+    tracks: (raw.tracks ?? []).map((t) =>
+      normalizeTrack({
+        ...t,
+        artist_name: raw.artist_name,
+        artist_id: raw.artist_id,
+        album_name: raw.name,
+        album_id: raw.id,
+        image: raw.image,
+        audio: t.audio,
+        shareurl: t.shareurl ?? '',
+      })
+    ),
+  }
+}
+
+export function getPopularAlbums(limit = 12) {
+  return cached(`albums:popular:${limit}`, 600, async () => {
+    const results = await request('albums/tracks', {
+      order: 'popularity_week',
+      limit,
+      imagesize: 400,
+      audioformat: 'mp31',
+    })
+    return results.map(normalizeAlbum)
+  })
+}
+
+export function getAlbum(id) {
+  return cached(`albums:${id}`, 600, async () => {
+    const results = await request('albums/tracks', {
+      id,
+      imagesize: 400,
+      audioformat: 'mp31',
+    })
+    return results.length ? normalizeAlbum(results[0]) : null
+  })
+}
