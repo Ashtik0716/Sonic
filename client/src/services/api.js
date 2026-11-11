@@ -22,3 +22,11 @@ export function getTrendingTracks(limit = 20) {
 export function searchTracks(query, limit = 20) {
   return request('/api/tracks/search', { q: query, limit })
 }
+
+export function getPopularAlbums() {
+  return request('/api/albums/popular')
+}
+
+export function getAlbum(id) {
+  return request(`/api/albums/${id}`)
+}

@@ -6,7 +6,8 @@ import AlbumCard from '../components/music/AlbumCard'
 import ArtistCard from '../components/music/ArtistCard'
 import { usePlayer } from '../context/PlayerContext'
 import { useTrending } from '../hooks/useTrending'
-import { popularAlbums, featuredArtists } from '../data/mockTracks'
+import { usePopularAlbums } from '../hooks/usePopularAlbums'
+import {featuredArtists} from '../data/mockTracks'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -18,6 +19,7 @@ function getGreeting() {
 function Home() {
   const { playTrack } = usePlayer()
   const { tracks, loading, error, retry } = useTrending(20)
+  const { albums, loading: albumsLoading } = usePopularAlbums()
 
   // First six real tracks become the quick picks
   const quickPicks = tracks.slice(0, 6)
@@ -60,15 +62,15 @@ function Home() {
 
       <Section title="Trending now">
         {loading
-          ? 
-            Array.from({ length: 8 }, (_, i) => <TrackCardSkeleton key={i} />)
+          ?
+          Array.from({ length: 8 }, (_, i) => <TrackCardSkeleton key={i} />)
           : tracks.map((track) => <TrackCard key={track.id} track={track} list={tracks} />)}
       </Section>
 
       <Section title="Popular albums">
-        {popularAlbums.map((album) => (
-          <AlbumCard key={album.id} album={album} />
-        ))}
+        {albumsLoading
+          ? Array.from({ length: 6 }, (_, i) => <TrackCardSkeleton key={i} />)
+          : albums.map((album) => <AlbumCard key={album.id} album={album} />)}
       </Section>
 
       <Section title="Featured artists">

@@ -3,6 +3,7 @@ import AppLayout from './components/layout/AppLayout'
 import Home from './pages/Home'
 import Search from './pages/Search'
 import Library from './pages/Library'
+import Album from './pages/Album'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/library" element={<Library />} />
         <Route path="/library" element={<Library />} />
         <Route path="/library/*" element={<Library />} />
+        <Route path="/album/:id" element={<Album />} />
       </Route>
     </Routes>
   )
