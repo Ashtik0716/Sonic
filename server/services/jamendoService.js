@@ -1,3 +1,5 @@
+import { cached } from './cache.js'
+
 // Service layer: the only file that knows how Jamendo's API works
 const BASE_URL = 'https://api.jamendo.com/v3.0'
 
@@ -37,22 +39,29 @@ async function request(endpoint, params = {}) {
   return data.results
 }
 
-export async function getTrendingTracks(limit = 20) {
-  const results = await request('tracks', {
-    order: 'popularity_week',
-    limit,
-    imagesize: 400,
-    audioformat: 'mp31',
+export function getTrendingTracks(limit = 20) {
+  // 5 minutes: trending changes slowly
+  return cached(`trending:${limit}`, 300, async () => {
+    const results = await request('tracks', {
+      order: 'popularity_week',
+      limit,
+      imagesize: 400,
+      audioformat: 'mp31',
+    })
+    return results.map(normalizeTrack)
   })
-  return results.map(normalizeTrack)
 }
 
-export async function searchTracks(query, limit = 20) {
-  const results = await request('tracks', {
-    search: query,
-    limit,
-    imagesize: 400,
-    audioformat: 'mp31',
+export function searchTracks(query, limit = 20) {
+  // Lowercase the key so "Piano" and "piano" share one entry. 2 minutes.
+  const key = `search:${query.toLowerCase()}:${limit}`
+  return cached(key, 120, async () => {
+    const results = await request('tracks', {
+      search: query,
+      limit,
+      imagesize: 400,
+      audioformat: 'mp31',
+    })
+    return results.map(normalizeTrack)
   })
-  return results.map(normalizeTrack)
 }
