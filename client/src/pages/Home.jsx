@@ -7,7 +7,7 @@ import ArtistCard from '../components/music/ArtistCard'
 import { usePlayer } from '../context/PlayerContext'
 import { useTrending } from '../hooks/useTrending'
 import { usePopularAlbums } from '../hooks/usePopularAlbums'
-import {featuredArtists} from '../data/mockTracks'
+import { usePopularArtists } from '../hooks/usePopularArtists'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -20,6 +20,7 @@ function Home() {
   const { playTrack } = usePlayer()
   const { tracks, loading, error, retry } = useTrending(20)
   const { albums, loading: albumsLoading } = usePopularAlbums()
+  const { artists, loading: artistsLoading } = usePopularArtists()
 
   // First six real tracks become the quick picks
   const quickPicks = tracks.slice(0, 6)
@@ -74,10 +75,10 @@ function Home() {
       </Section>
 
       <Section title="Featured artists">
-        {featuredArtists.map((artist) => (
-          <ArtistCard key={artist.id} artist={artist} />
-        ))}
-      </Section>
+  {artistsLoading
+    ? Array.from({ length: 6 }, (_, i) => <TrackCardSkeleton key={i} />)
+    : artists.map((artist) => <ArtistCard key={artist.id} artist={artist} />)}
+</Section>
     </div>
   )
 }

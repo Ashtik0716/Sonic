@@ -30,3 +30,11 @@ export function getPopularAlbums() {
 export function getAlbum(id) {
   return request(`/api/albums/${id}`)
 }
+
+export function getPopularArtists() {
+  return request('/api/artists/popular')
+}
+
+export function getArtist(id) {
+  return request(`/api/artists/${id}`)
+}
