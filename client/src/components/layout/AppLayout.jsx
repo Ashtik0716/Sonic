@@ -3,6 +3,7 @@ import Sidebar from './Sidebar'
 import Navbar from './Navbar'
 import Player from './Player'
 import MobileNav from './MobileNav'
+import ErrorBoundary from './ErrorBoundary'
 
 function AppLayout() {
   return (
@@ -15,8 +16,10 @@ function AppLayout() {
 
           {/* px-4 on phones, px-6 from md up */}
           <div className="px-4 pb-6 md:px-6">
-            <Outlet />
-          </div>
+  <ErrorBoundary>
+    <Outlet />
+  </ErrorBoundary>
+</div>
         </main>
       </div>
 
