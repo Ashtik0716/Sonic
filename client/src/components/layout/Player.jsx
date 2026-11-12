@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
     Shuffle, SkipBack, SkipForward, Play, Pause, Repeat, Repeat1,
     Heart, Volume1, Volume2, VolumeX, ListMusic,
@@ -69,8 +70,27 @@ function Player() {
                 />
                 {/* min-w-0 + truncate: long titles get "..." instead of breaking layout */}
                 <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{currentTrack.title}</p>
-                    <p className="truncate text-xs text-ink-300">{currentTrack.artist}</p>
+                    {currentTrack.albumId ? (
+    <Link
+      to={`/album/${currentTrack.albumId}`}
+      className="block truncate text-sm font-semibold hover:underline"
+    >
+      {currentTrack.title}
+    </Link>
+  ) : (
+    <p className="truncate text-sm font-semibold">{currentTrack.title}</p>
+  )}
+  {/* Artist links to the artist page */}
+  {currentTrack.artistId ? (
+    <Link
+      to={`/artist/${currentTrack.artistId}`}
+      className="block truncate text-xs text-ink-300 hover:text-ink-100 hover:underline"
+    >
+      {currentTrack.artist}
+    </Link>
+  ) : (
+    <p className="truncate text-xs text-ink-300">{currentTrack.artist}</p>
+  )}
                 </div>
                 <button
                     onClick={() => setIsLiked(!isLiked)}
