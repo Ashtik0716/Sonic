@@ -174,3 +174,42 @@ export async function getTracksByIds(ids) {
   })
   return results.map(normalizeTrack)
 }
+
+// Search artists by name
+function searchArtists(query, limit = 8) {
+  return cached(`search:artists:${query.toLowerCase()}:${limit}`, 120, async () => {
+    const results = await request('artists', { namesearch: query, limit, imagesize: 400 })
+    return results.map(normalizeArtist)
+  })
+}
+
+// Search albums by name
+function searchAlbums(query, limit = 8) {
+  return cached(`search:albums:${query.toLowerCase()}:${limit}`, 120, async () => {
+    const results = await request('albums', { namesearch: query, limit, imagesize: 400 })
+    return results.map((a) => ({
+      id: a.id,
+      title: a.name,
+      artist: a.artist_name,
+      artistId: a.artist_id,
+      cover: a.image,
+      year: a.releasedate ? a.releasedate.slice(0, 4) : '',
+    }))
+  })
+}
+
+// Run all three searches at once; a failed one becomes an empty list
+export async function searchAll(query) {
+  const [tracks, artists, albums] = await Promise.allSettled([
+    searchTracks(query, 20),
+    searchArtists(query),
+    searchAlbums(query),
+  ])
+  const value = (r) => (r.status === 'fulfilled' ? r.value : [])
+
+  // If everything failed, that is a real error worth reporting
+  if ([tracks, artists, albums].every((r) => r.status === 'rejected')) {
+    throw new Error('All searches failed')
+  }
+  return { tracks: value(tracks), artists: value(artists), albums: value(albums) }
+}

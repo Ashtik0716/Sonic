@@ -1,4 +1,4 @@
-import { getTrendingTracks, searchTracks } from '../services/jamendoService.js'
+import { getTrendingTracks, searchTracks, searchAll } from '../services/jamendoService.js'
 
 // Keep limit between 1 and 50 so nobody can request thousands of tracks
 function parseLimit(value) {
@@ -28,6 +28,20 @@ export async function search(req, res) {
   try {
     const tracks = await searchTracks(q, parseLimit(req.query.limit))
     res.json(tracks)
+  } catch (err) {
+    console.error(err.message)
+    res.status(502).json({ message: 'Search failed' })
+  }
+}
+
+// GET /api/search?q=chill
+export async function searchEverything(req, res) {
+  const q = (req.query.q ?? '').trim()
+  if (!q) return res.status(400).json({ message: 'Query parameter "q" is required' })
+  if (q.length > 100) return res.status(400).json({ message: 'Query is too long' })
+
+  try {
+    res.json(await searchAll(q))
   } catch (err) {
     console.error(err.message)
     res.status(502).json({ message: 'Search failed' })
