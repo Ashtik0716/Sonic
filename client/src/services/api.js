@@ -65,3 +65,14 @@ export function loginUser(email, password) {
 export function getMe() {
   return request('/api/auth/me')
 }
+export function getLikedIds() {
+  return request('/api/likes')
+}
+
+export function likeTrack(id) {
+  return request(`/api/likes/${id}`, {}, { method: 'PUT' })
+}
+
+export function unlikeTrack(id) {
+  return request(`/api/likes/${id}`, {}, { method: 'DELETE' })
+}
