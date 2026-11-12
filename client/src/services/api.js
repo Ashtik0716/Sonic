@@ -109,3 +109,7 @@ export function getHistory() {
 export function recordPlay(trackId) {
   return request(`/api/history/${trackId}`, {}, { method: 'PUT' })
 }
+
+export function searchAll(query) {
+  return request('/api/search', { q: query })
+}

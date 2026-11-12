@@ -1,31 +1,31 @@
 import { useEffect, useState } from 'react'
-import { searchTracks } from '../services/api'
+import { searchAll } from '../services/api'
 import { useDebounce } from './useDebounce'
 
+const EMPTY = { tracks: [], artists: [], albums: [] }
+
 export function useSearch(query) {
-  const [results, setResults] = useState([])
+  const [results, setResults] = useState(EMPTY)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  // Only react to the query once typing pauses
   const debouncedQuery = useDebounce(query.trim(), 400)
 
   useEffect(() => {
-    // Empty search: clear results and don't call the API
     if (!debouncedQuery) {
-      setResults([])
+      setResults(EMPTY)
       setLoading(false)
       setError(null)
       return
     }
 
-    let cancelled = false // ignore answers from outdated searches
+    let cancelled = false
 
     async function run() {
       setLoading(true)
       setError(null)
       try {
-        const data = await searchTracks(debouncedQuery)
+        const data = await searchAll(debouncedQuery)
         if (!cancelled) setResults(data)
       } catch (err) {
         if (!cancelled) setError(err.message)
