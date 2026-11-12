@@ -113,3 +113,52 @@ export function getAlbum(id) {
     return results.length ? normalizeAlbum(results[0]) : null
   })
 }
+
+// Convert one Jamendo artist into our shape
+function normalizeArtist(raw) {
+  return {
+    id: raw.id,
+    name: raw.name,
+    cover: raw.image,
+  }
+}
+
+export function getPopularArtists(limit = 12) {
+  return cached(`artists:popular:${limit}`, 600, async () => {
+    const results = await request('artists', {
+      order: 'popularity_week',
+      limit,
+      imagesize: 400,
+    })
+    return results.map(normalizeArtist)
+  })
+}
+
+// One artist: profile + their top tracks + their albums, fetched in parallel
+export function getArtist(id) {
+  return cached(`artists:${id}`, 600, async () => {
+    const [profile, tracks, albums] = await Promise.all([
+      request('artists', { id, imagesize: 400 }),
+      request('tracks', {
+        artist_id: id,
+        order: 'popularity_total',
+        limit: 10,
+        imagesize: 400,
+        audioformat: 'mp31',
+      }),
+      request('albums/tracks', {
+        artist_id: id,
+        order: 'popularity_total',
+        limit: 10,
+        imagesize: 400,
+        audioformat: 'mp31',
+      }),
+    ])
+    if (profile.length === 0) return null
+    return {
+      ...normalizeArtist(profile[0]),
+      tracks: tracks.map(normalizeTrack),
+      albums: albums.map(normalizeAlbum),
+    }
+  })
+}
