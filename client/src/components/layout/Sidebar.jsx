@@ -1,13 +1,14 @@
-import { Home, Search, Library, Heart, ListMusic, Clock } from 'lucide-react'
+import { Home, Search, Library, Heart, ListMusic, Clock, Plus } from 'lucide-react'
+import { NavLink, useNavigate } from 'react-router-dom'
 import SidebarLink from './SidebarLink'
+import { useAuth } from '../../context/AuthContext'
+import { usePlaylists } from '../../context/PlaylistContext'
 
-// Data-driven navigation: to add a link later, add one line here
 const mainLinks = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/search', icon: Search, label: 'Search' },
 ]
 
-// Library shortcuts: real pages come in later phases
 const libraryLinks = [
   { to: '/library', icon: Library, label: 'Your Library' },
   { to: '/library/liked', icon: Heart, label: 'Liked Songs' },
@@ -16,8 +17,24 @@ const libraryLinks = [
 ]
 
 function Sidebar() {
+  const { user } = useAuth()
+  const { playlists, create } = usePlaylists()
+  const navigate = useNavigate()
+
+  // Ask for a name, create the playlist, then open it
+  async function handleCreate() {
+    if (!user) return navigate('/login')
+    const name = window.prompt('Playlist name')
+    if (!name?.trim()) return
+    try {
+      const playlist = await create(name.trim())
+      navigate(`/playlist/${playlist.id}`)
+    } catch (err) {
+      window.alert(err.message)
+    }
+  }
+
   return (
-    // Hidden on mobile, shown from md up. Step 7 adds mobile navigation.
     <aside className="hidden w-64 shrink-0 flex-col gap-2 md:flex">
       {/* Top panel: logo + main navigation */}
       <div className="rounded-xl bg-surface-900 p-4">
@@ -29,24 +46,53 @@ function Sidebar() {
         </div>
 
         <nav className="flex flex-col">
-          {/* .map() turns each object in the array into a component */}
           {mainLinks.map((link) => (
-            // key helps React track which item is which when the list changes
             <SidebarLink key={link.to} {...link} />
           ))}
         </nav>
       </div>
 
-      {/* Bottom panel: library, fills the remaining height and scrolls */}
+      {/* Bottom panel: library, scrolls when it gets long */}
       <div className="min-h-0 flex-1 overflow-y-auto rounded-xl bg-surface-900 p-4">
-        <p className="mb-2 px-3 text-sm font-semibold uppercase tracking-wider text-ink-500">
-          Library
-        </p>
+        {/* Header with the create-playlist button */}
+        <div className="mb-2 flex items-center justify-between px-3">
+          <p className="text-sm font-semibold uppercase tracking-wider text-ink-500">Library</p>
+          <button
+            onClick={handleCreate}
+            aria-label="Create playlist"
+            className="rounded-full p-1 text-ink-300 transition hover:bg-surface-700 hover:text-ink-100"
+          >
+            <Plus size={18} />
+          </button>
+        </div>
+
         <nav className="flex flex-col">
           {libraryLinks.map((link) => (
             <SidebarLink key={link.to} {...link} />
           ))}
         </nav>
+
+        {/* User playlists, only shown once there is at least one */}
+        {playlists.length > 0 && (
+          <div className="mt-4 border-t border-surface-700 pt-4">
+            <p className="mb-2 px-3 text-sm font-semibold uppercase tracking-wider text-ink-500">
+              Playlists
+            </p>
+            {playlists.map((p) => (
+              <NavLink
+                key={p.id}
+                to={`/playlist/${p.id}`}
+                className={({ isActive }) =>
+                  `block truncate rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    isActive ? 'text-brand-400' : 'text-ink-300 hover:text-ink-100'
+                  }`
+                }
+              >
+                {p.name}
+              </NavLink>
+            ))}
+          </div>
+        )}
       </div>
     </aside>
   )

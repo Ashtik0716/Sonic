@@ -80,3 +80,25 @@ export function unlikeTrack(id) {
 export function getLikedTracks() {
   return request('/api/likes/tracks')
 }
+
+export function getPlaylists() {
+  return request('/api/playlists')
+}
+export function createPlaylist(name) {
+  return request('/api/playlists', {}, { method: 'POST', body: JSON.stringify({ name }) })
+}
+export function getPlaylist(id) {
+  return request(`/api/playlists/${id}`)
+}
+export function renamePlaylist(id, name) {
+  return request(`/api/playlists/${id}`, {}, { method: 'PATCH', body: JSON.stringify({ name }) })
+}
+export function deletePlaylist(id) {
+  return request(`/api/playlists/${id}`, {}, { method: 'DELETE' })
+}
+export function addToPlaylist(id, trackId) {
+  return request(`/api/playlists/${id}/tracks/${trackId}`, {}, { method: 'PUT' })
+}
+export function removeFromPlaylist(id, trackId) {
+  return request(`/api/playlists/${id}/tracks/${trackId}`, {}, { method: 'DELETE' })
+}

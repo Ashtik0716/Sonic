@@ -8,6 +8,7 @@ import Artist from './pages/Artist'
 import Auth from './pages/Auth'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import LikedSongs from './pages/LikedSongs'
+import Playlist from './pages/Playlist'
 
 function App() {
   return (
@@ -17,10 +18,11 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
         <Route element={<ProtectedRoute />}>
-        <Route path="/library/liked" element={<LikedSongs />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/library/*" element={<Library />} />
-        </Route>
+  <Route path="/library" element={<Library />} />
+  <Route path="/library/liked" element={<LikedSongs />} />
+  <Route path="/library/*" element={<Library />} />
+  <Route path="/playlist/:id" element={<Playlist />} />
+</Route>
         <Route path="/library/*" element={<Library />} />
         <Route path="/album/:id" element={<Album />} />
         <Route path="/artist/:id" element={<Artist />} />

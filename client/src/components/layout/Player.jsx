@@ -6,6 +6,7 @@ import {
 import { usePlayer } from '../../context/PlayerContext'
 import { formatTime } from '../../utils/formatTime'
 import LikeButton  from '../music/LikeButton'
+import AddToPlaylist from '../music/AddToPlaylist'
 
 // Small reusable button so we don't repeat these classes 7 times
 function IconButton({ icon: Icon, label, active = false, size = 20, onClick }) {
@@ -92,6 +93,7 @@ function Player() {
                     )}
                 </div>
                 <LikeButton trackId={currentTrack.id} className="ml-1 hidden sm:block" />
+                <AddToPlaylist trackId={currentTrack.id} className="hidden sm:block" />
             </div>
 
             {/* CENTRE: controls + progress bar */}
