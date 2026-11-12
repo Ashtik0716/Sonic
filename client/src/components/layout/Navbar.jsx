@@ -1,11 +1,13 @@
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Search, User } from 'lucide-react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 
 function Navbar() {
     // useNavigate returns a function we can call to change pages
     const navigate = useNavigate()
     const location = useLocation()
     const [searchParams] = useSearchParams()
+    const { user, logout } = useAuth()
 
     return (
         // sticky: stays at the top while the page scrolls underneath
@@ -56,12 +58,24 @@ function Navbar() {
             </div>
 
             {/* Profile button: placeholder until authentication exists */}
-            <button
-                aria-label="Profile"
-                className="ml-auto flex h-10 w-10 items-center justify-center rounded-full bg-brand-500 text-white transition hover:scale-105 hover:bg-brand-600"
-            >
-                <User size={20} />
-            </button>
+            {user ? (
+                <div className="ml-auto flex items-center gap-3">
+                    <span className="hidden text-sm font-semibold md:block">{user.name}</span>
+                    <button
+                        onClick={logout}
+                        className="rounded-full bg-surface-700 px-4 py-2 text-sm font-semibold transition hover:bg-surface-600"
+                    >
+                        Log out
+                    </button>
+                </div>
+            ) : (
+                <Link
+                    to="/login"
+                    className="ml-auto rounded-full bg-white px-5 py-2 text-sm font-semibold text-surface-950 transition hover:scale-105"
+                >
+                    Log in
+                </Link>
+            )}
         </header>
     )
 }

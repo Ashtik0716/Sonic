@@ -3,12 +3,21 @@
 // In production we will set VITE_API_URL to the deployed backend address.
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
-async function request(path, params = {}) {
+async function request(path, params = {}, options = {}) {
   const query = new URLSearchParams(params)
-  const response = await fetch(`${BASE_URL}${path}?${query}`)
+  const qs = query.toString() ? `?${query}` : ''
+  const token = localStorage.getItem('sonic-token')
+
+  const response = await fetch(`${BASE_URL}${path}${qs}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      // Attach the token automatically when we have one
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  })
 
   if (!response.ok) {
-    // Our server sends { message } on errors
     const body = await response.json().catch(() => ({}))
     throw new Error(body.message || `Request failed (${response.status})`)
   }
@@ -37,4 +46,22 @@ export function getPopularArtists() {
 
 export function getArtist(id) {
   return request(`/api/artists/${id}`)
+}
+
+export function registerUser(name, email, password) {
+  return request('/api/auth/register', {}, {
+    method: 'POST',
+    body: JSON.stringify({ name, email, password }),
+  })
+}
+
+export function loginUser(email, password) {
+  return request('/api/auth/login', {}, {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  })
+}
+
+export function getMe() {
+  return request('/api/auth/me')
 }

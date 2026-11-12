@@ -4,15 +4,17 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
 import { PlayerProvider } from './context/PlayerContext.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      {/* Everything inside can now call usePlayer() */}
-      <PlayerProvider>
-        <App />
-      </PlayerProvider>
-    </BrowserRouter>
+  <AuthProvider>
+    <PlayerProvider>
+      <App />
+    </PlayerProvider>
+  </AuthProvider>
+</BrowserRouter>
   </StrictMode>,
 )

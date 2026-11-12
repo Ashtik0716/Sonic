@@ -5,6 +5,7 @@ import Search from './pages/Search'
 import Library from './pages/Library'
 import Album from './pages/Album'
 import Artist from './pages/Artist'
+import Auth from './pages/Auth'
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
         <Route path="/library/*" element={<Library />} />
         <Route path="/album/:id" element={<Album />} />
         <Route path="/artist/:id" element={<Artist />} />
+        <Route path="/login" element={<Auth />} />
+<Route path="/register" element={<Auth />} />
       </Route>
     </Routes>
   )
