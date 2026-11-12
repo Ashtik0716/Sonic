@@ -25,6 +25,10 @@ app.get('/api/health', (req, res) => {
 // Connect to the database first; only start listening if it works
 connectDB()
   .then(() => {
+    import('./models/User.js').then(async ({ default: User }) => {
+      const count = await User.countDocuments()
+      console.log('Users in database:', count)
+    })
     app.listen(PORT, () => {
       console.log(`Sonic API running on http://localhost:${PORT}`)
     })
