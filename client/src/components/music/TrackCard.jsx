@@ -1,7 +1,8 @@
 import { Play, Pause } from 'lucide-react'
 import { usePlayer } from '../../context/PlayerContext'
+import  LikeButton  from './LikeButton'
 
-function TrackCard({ track , list}) {
+function TrackCard({ track, list }) {
   const { currentTrack, isPlaying, playTrack, togglePlay } = usePlayer()
 
   // Is THIS card's track the one loaded, and is it playing right now?
@@ -24,15 +25,19 @@ function TrackCard({ track , list}) {
           alt={`${track.title} cover`}
           className="aspect-square w-full rounded-lg object-cover"
         />
+        <LikeButton
+          trackId={track.id}
+          size={20}
+          className="absolute left-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-surface-950/60 backdrop-blur"
+        />
         <button
           onClick={handleClick}
           aria-label={isThisPlaying ? `Pause ${track.title}` : `Play ${track.title}`}
           // Stays visible while this track is playing, otherwise appears on hover
-          className={`absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg transition hover:scale-105 ${
-            isThisPlaying
+          className={`absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg transition hover:scale-105 ${isThisPlaying
               ? 'translate-y-0 opacity-100'
               : 'translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100'
-          }`}
+            }`}
         >
           {isThisPlaying ? (
             <Pause size={20} className="fill-current" />

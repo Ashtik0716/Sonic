@@ -1,11 +1,11 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
     Shuffle, SkipBack, SkipForward, Play, Pause, Repeat, Repeat1,
-    Heart, Volume1, Volume2, VolumeX, ListMusic,
+    Volume1, Volume2, VolumeX, ListMusic,
 } from 'lucide-react'
 import { usePlayer } from '../../context/PlayerContext'
 import { formatTime } from '../../utils/formatTime'
+import LikeButton  from '../music/LikeButton'
 
 // Small reusable button so we don't repeat these classes 7 times
 function IconButton({ icon: Icon, label, active = false, size = 20, onClick }) {
@@ -24,25 +24,24 @@ function IconButton({ icon: Icon, label, active = false, size = 20, onClick }) {
 function Player() {
     // Read shared state from context instead of keeping our own
     const {
-  currentTrack,
-  isPlaying,
-  isShuffle,
-  repeatMode,
-  progress,
-  duration,
-  volume,
-  isMuted,
-  togglePlay,
-  playNext,
-  playPrevious,
-  toggleShuffle,
-  cycleRepeat,
-  seek,
-  setVolume,
-  toggleMute,
-} = usePlayer()
-    // Liking stays local for now; it moves to the backend in Phase 10
-    const [isLiked, setIsLiked] = useState(false)
+        currentTrack,
+        isPlaying,
+        isShuffle,
+        repeatMode,
+        progress,
+        duration,
+        volume,
+        isMuted,
+        togglePlay,
+        playNext,
+        playPrevious,
+        toggleShuffle,
+        cycleRepeat,
+        seek,
+        setVolume,
+        toggleMute
+    } = usePlayer()
+
     // How far through the song we are, as a percentage (guard against dividing by 0)
     const percent = duration ? (progress / duration) * 100 : 0
 
@@ -71,37 +70,28 @@ function Player() {
                 {/* min-w-0 + truncate: long titles get "..." instead of breaking layout */}
                 <div className="min-w-0">
                     {currentTrack.albumId ? (
-    <Link
-      to={`/album/${currentTrack.albumId}`}
-      className="block truncate text-sm font-semibold hover:underline"
-    >
-      {currentTrack.title}
-    </Link>
-  ) : (
-    <p className="truncate text-sm font-semibold">{currentTrack.title}</p>
-  )}
-  {/* Artist links to the artist page */}
-  {currentTrack.artistId ? (
-    <Link
-      to={`/artist/${currentTrack.artistId}`}
-      className="block truncate text-xs text-ink-300 hover:text-ink-100 hover:underline"
-    >
-      {currentTrack.artist}
-    </Link>
-  ) : (
-    <p className="truncate text-xs text-ink-300">{currentTrack.artist}</p>
-  )}
+                        <Link
+                            to={`/album/${currentTrack.albumId}`}
+                            className="block truncate text-sm font-semibold hover:underline"
+                        >
+                            {currentTrack.title}
+                        </Link>
+                    ) : (
+                        <p className="truncate text-sm font-semibold">{currentTrack.title}</p>
+                    )}
+                    {/* Artist links to the artist page */}
+                    {currentTrack.artistId ? (
+                        <Link
+                            to={`/artist/${currentTrack.artistId}`}
+                            className="block truncate text-xs text-ink-300 hover:text-ink-100 hover:underline"
+                        >
+                            {currentTrack.artist}
+                        </Link>
+                    ) : (
+                        <p className="truncate text-xs text-ink-300">{currentTrack.artist}</p>
+                    )}
                 </div>
-                <button
-                    onClick={() => setIsLiked(!isLiked)}
-                    aria-label={isLiked ? 'Unlike' : 'Like'}
-                    className="ml-1 hidden transition hover:scale-110 sm:block"
-                >
-                    <Heart
-                        size={18}
-                        className={isLiked ? 'fill-brand-400 text-brand-400' : 'text-ink-300'}
-                    />
-                </button>
+                <LikeButton trackId={currentTrack.id} className="ml-1 hidden sm:block" />
             </div>
 
             {/* CENTRE: controls + progress bar */}

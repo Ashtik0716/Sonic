@@ -7,6 +7,7 @@ import Album from './pages/Album'
 import Artist from './pages/Artist'
 import Auth from './pages/Auth'
 import ProtectedRoute from './components/layout/ProtectedRoute'
+import LikedSongs from './pages/LikedSongs'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
         <Route element={<ProtectedRoute />}>
+        <Route path="/library/liked" element={<LikedSongs />} />
           <Route path="/library" element={<Library />} />
           <Route path="/library/*" element={<Library />} />
         </Route>

@@ -162,3 +162,15 @@ export function getArtist(id) {
     }
   })
 }
+
+// Look up many tracks at once by id (Jamendo accepts ids joined with "+")
+export async function getTracksByIds(ids) {
+  if (ids.length === 0) return []
+  const results = await request('tracks', {
+    id: ids.join('+'),
+    limit: ids.length,
+    imagesize: 400,
+    audioformat: 'mp31',
+  })
+  return results.map(normalizeTrack)
+}

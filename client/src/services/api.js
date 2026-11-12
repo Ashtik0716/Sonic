@@ -76,3 +76,7 @@ export function likeTrack(id) {
 export function unlikeTrack(id) {
   return request(`/api/likes/${id}`, {}, { method: 'DELETE' })
 }
+
+export function getLikedTracks() {
+  return request('/api/likes/tracks')
+}
