@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 
+
 // Create a signed token containing the user's id
 function signToken(userId) {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -66,4 +67,9 @@ export async function login(req, res) {
     console.error(err.message)
     res.status(500).json({ message: 'Login failed' })
   }
+}
+
+// GET /api/auth/me  (protected): returns the logged-in user
+export function me(req, res) {
+  res.json({ user: publicUser(req.user) })
 }
