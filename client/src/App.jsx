@@ -6,6 +6,7 @@ import Library from './pages/Library'
 import Album from './pages/Album'
 import Artist from './pages/Artist'
 import Auth from './pages/Auth'
+import ProtectedRoute from './components/layout/ProtectedRoute'
 
 function App() {
   return (
@@ -14,13 +15,15 @@ function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/library" element={<Library />} />
-        <Route path="/library" element={<Library />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/library" element={<Library />} />
+          <Route path="/library/*" element={<Library />} />
+        </Route>
         <Route path="/library/*" element={<Library />} />
         <Route path="/album/:id" element={<Album />} />
         <Route path="/artist/:id" element={<Artist />} />
         <Route path="/login" element={<Auth />} />
-<Route path="/register" element={<Auth />} />
+        <Route path="/register" element={<Auth />} />
       </Route>
     </Routes>
   )
