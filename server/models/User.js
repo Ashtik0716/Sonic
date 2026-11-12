@@ -22,7 +22,9 @@ const userSchema = new mongoose.Schema(
       select: false, // hidden from queries unless we ask for it
     },
     // Track ids (Jamendo ids are strings) the user has liked
-    likedTracks: [{ type: String }],
+        likedTracks: [{ type: String }],
+    // Most recent first, capped at 30
+    recentTracks: [{ type: String }],
   },
   {
     timestamps: true, // adds createdAt and updatedAt automatically

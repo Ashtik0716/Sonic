@@ -102,3 +102,10 @@ export function addToPlaylist(id, trackId) {
 export function removeFromPlaylist(id, trackId) {
   return request(`/api/playlists/${id}/tracks/${trackId}`, {}, { method: 'DELETE' })
 }
+
+export function getHistory() {
+  return request('/api/history')
+}
+export function recordPlay(trackId) {
+  return request(`/api/history/${trackId}`, {}, { method: 'PUT' })
+}

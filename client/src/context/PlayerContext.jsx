@@ -1,4 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { useAuth } from './AuthContext'
+import { recordPlay } from '../services/api'
 
 const PlayerContext = createContext(null)
 
@@ -8,6 +10,7 @@ export function PlayerProvider({ children }) {
     const [isPlaying, setIsPlaying] = useState(false)
     const [isShuffle, setIsShuffle] = useState(false)
     const [repeatMode, setRepeatMode] = useState('off')
+    const { user } = useAuth()
 
     // NEW: a handle to the real <audio> element, plus time info copied from it
     const audioRef = useRef(null)
@@ -89,6 +92,16 @@ export function PlayerProvider({ children }) {
             // Some browsers throw on invalid values; safe to ignore
         }
     }, [progress, duration])
+
+    // Record a play once the track has been playing for 5 seconds
+useEffect(() => {
+  if (!user || !currentTrack || !isPlaying) return
+  const timer = setTimeout(() => {
+    recordPlay(currentTrack.id).catch(() => {}) // history is nice-to-have; ignore failures
+  }, 5000)
+  // Skipping or pausing before 5s cancels the timer
+  return () => clearTimeout(timer)
+}, [user, currentTrack, isPlaying])
 
     function playTrack(track, list = [track]) {
         const index = list.findIndex((t) => t.id === track.id)

@@ -8,6 +8,7 @@ import { usePlayer } from '../context/PlayerContext'
 import { useTrending } from '../hooks/useTrending'
 import { usePopularAlbums } from '../hooks/usePopularAlbums'
 import { usePopularArtists } from '../hooks/usePopularArtists'
+import { useHistory } from '../hooks/useHistory'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -21,6 +22,7 @@ function Home() {
   const { tracks, loading, error, retry } = useTrending(20)
   const { albums, loading: albumsLoading } = usePopularAlbums()
   const { artists, loading: artistsLoading } = usePopularArtists()
+  const { tracks: recent } = useHistory()
 
   // First six real tracks become the quick picks
   const quickPicks = tracks.slice(0, 6)
@@ -60,6 +62,13 @@ function Home() {
           ))}
         </div>
       )}
+      {recent.length > 0 && (
+        <Section title="Recently played">
+          {recent.slice(0, 10).map((track) => (
+            <TrackCard key={track.id} track={track} list={recent} />
+          ))}
+        </Section>
+      )}
 
       <Section title="Trending now">
         {loading
@@ -75,10 +84,10 @@ function Home() {
       </Section>
 
       <Section title="Featured artists">
-  {artistsLoading
-    ? Array.from({ length: 6 }, (_, i) => <TrackCardSkeleton key={i} />)
-    : artists.map((artist) => <ArtistCard key={artist.id} artist={artist} />)}
-</Section>
+        {artistsLoading
+          ? Array.from({ length: 6 }, (_, i) => <TrackCardSkeleton key={i} />)
+          : artists.map((artist) => <ArtistCard key={artist.id} artist={artist} />)}
+      </Section>
     </div>
   )
 }
