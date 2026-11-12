@@ -7,6 +7,7 @@ import artistRoutes from './routes/artistRoutes.js'
 import { connectDB } from './config/db.js'
 import authRoutes from './routes/authRoutes.js'
 import likeRoutes from './routes/likeRoutes.js'
+import playlistRoutes from './routes/playlistRoutes.js'
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -20,6 +21,7 @@ app.use('/api/albums', albumRoutes)
 app.use('/api/artists', artistRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/likes', likeRoutes)
+app.use('/api/playlists', playlistRoutes)
 
 // A route: GET /api/health -> JSON response
 app.get('/api/health', (req, res) => {
