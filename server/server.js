@@ -15,7 +15,8 @@ const app = express()
 const PORT = process.env.PORT || 5000
 
 // Middleware: functions that run on every request before your routes
-app.use(cors()) // allow requests from the frontend
+// Only the real frontend may call this API from a browser
+app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' })) // allow requests from the frontend
 app.use(express.json()) // parse JSON request bodies (needed later for login)
 // Everything in trackRoutes lives under /api/tracks
 app.use('/api/tracks', trackRoutes)

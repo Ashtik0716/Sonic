@@ -41,7 +41,7 @@ async function request(endpoint, params = {}) {
 
 export function getTrendingTracks(limit = 20) {
   // 5 minutes: trending changes slowly
-  return cached(`trending:${limit}`, 300, async () => {
+  return cached(`trending:${limit}`, 60, async () => {
     const results = await request('tracks', {
       order: 'popularity_week',
       limit,

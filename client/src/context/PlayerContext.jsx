@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { useAuth } from './AuthContext'
 import { recordPlay } from '../services/api'
+import { useToast } from './ToastContext'
 
 const PlayerContext = createContext(null)
 
@@ -11,6 +12,7 @@ export function PlayerProvider({ children }) {
     const [isShuffle, setIsShuffle] = useState(false)
     const [repeatMode, setRepeatMode] = useState('off')
     const { user } = useAuth()
+    const { toast } = useToast()
 
     // NEW: a handle to the real <audio> element, plus time info copied from it
     const audioRef = useRef(null)
@@ -21,6 +23,14 @@ export function PlayerProvider({ children }) {
     const [volume, setVolumeState] = useState(() => {
         const saved = localStorage.getItem('sonic-volume')
         return saved !== null ? Number(saved) : 0.8
+    })
+
+    const [unavailable, setUnavailable] = useState(() => {
+        try {
+            return new Set(JSON.parse(localStorage.getItem('sonic-unavailable') ?? '[]'))
+        } catch {
+            return new Set()
+        }
     })
     const [isMuted, setIsMuted] = useState(false)
 
@@ -186,6 +196,38 @@ export function PlayerProvider({ children }) {
         }
     }
 
+    // A track failed to load: remember it, remove it from the queue, move on
+    function handleError() {
+        if (!currentTrack) return
+        const deadId = currentTrack.id
+
+        // 1. Remember it (and save for next visit)
+        setUnavailable((prev) => {
+            const next = new Set(prev).add(deadId)
+            localStorage.setItem('sonic-unavailable', JSON.stringify([...next]))
+            return next
+        })
+        toast(`"${currentTrack.title}" is unavailable`, 'error')
+
+        // 2. Remove it from the queue
+        const newQueue = queue.filter((t) => t.id !== deadId)
+        if (newQueue.length === 0) {
+            setQueue([])
+            setCurrentIndex(-1)
+            setIsPlaying(false)
+            return
+        }
+        setQueue(newQueue)
+        // After removal, the next song sits at the same index
+        if (currentIndex < newQueue.length) {
+            setCurrentIndex(currentIndex)
+        } else {
+            // The dead track was last: stop on the final remaining song
+            setCurrentIndex(newQueue.length - 1)
+            setIsPlaying(false)
+        }
+    }
+
     const value = {
         queue,
         currentTrack,
@@ -206,7 +248,8 @@ export function PlayerProvider({ children }) {
         setVolume,
         toggleMute,
         playFromQueue,
-        currentIndex
+        currentIndex,
+        unavailable,
     }
 
     return (
@@ -215,10 +258,11 @@ export function PlayerProvider({ children }) {
             {/* NEW: the one real audio element, invisible. React updates src when the track changes. */}
             <audio
                 ref={audioRef}
-                src={currentTrack?.audioUrl}
+                src={currentTrack?.audioUrl || undefined}
                 onTimeUpdate={(e) => setProgress(e.currentTarget.currentTime)}
                 onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
                 onEnded={handleEnded}
+                onError={handleError}
             />
         </PlayerContext.Provider>
     )
