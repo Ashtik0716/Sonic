@@ -1,5 +1,9 @@
-import { getTrendingTracks, searchTracks, searchAll } from '../services/jamendoService.js'
-
+import {
+  getTrendingTracks,
+  searchTracks,
+  searchAll,
+  getSimilarTracks,
+} from '../services/jamendoService.js'
 // Keep limit between 1 and 50 so nobody can request thousands of tracks
 function parseLimit(value) {
   const n = Number(value)
@@ -45,5 +49,18 @@ export async function searchEverything(req, res) {
   } catch (err) {
     console.error(err.message)
     res.status(502).json({ message: 'Search failed' })
+  }
+}
+
+// GET /api/tracks/:id/similar
+export async function similar(req, res) {
+  if (!/^\d+$/.test(req.params.id)) {
+    return res.status(400).json({ message: 'Invalid track id' })
+  }
+  try {
+    res.json(await getSimilarTracks(req.params.id))
+  } catch (err) {
+    console.error(err.message)
+    res.status(502).json({ message: 'Could not load recommendations' })
   }
 }

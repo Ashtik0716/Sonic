@@ -113,3 +113,7 @@ export function recordPlay(trackId) {
 export function searchAll(query) {
   return request('/api/search', { q: query })
 }
+
+export function getSimilarTracks(id) {
+  return request(`/api/tracks/${id}/similar`)
+}

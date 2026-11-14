@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import {
     Shuffle, SkipBack, SkipForward, Play, Pause, Repeat, Repeat1,
-    Volume1, Volume2, VolumeX, ListMusic,
+    Volume1, Volume2, VolumeX, ListMusic, Sparkles
 } from 'lucide-react'
 import { usePlayer } from '../../context/PlayerContext'
 import { formatTime } from '../../utils/formatTime'
-import LikeButton  from '../music/LikeButton'
+import LikeButton from '../music/LikeButton'
 import AddToPlaylist from '../music/AddToPlaylist'
 
 // Small reusable button so we don't repeat these classes 7 times
@@ -33,6 +33,8 @@ function Player({ onToggleQueue, queueOpen }) {
         duration,
         volume,
         isMuted,
+        autoplay,
+        toggleAutoplay,
         togglePlay,
         playNext,
         playPrevious,
@@ -40,7 +42,7 @@ function Player({ onToggleQueue, queueOpen }) {
         cycleRepeat,
         seek,
         setVolume,
-        toggleMute
+        toggleMute,
     } = usePlayer()
 
     // How far through the song we are, as a percentage (guard against dividing by 0)
@@ -117,6 +119,7 @@ function Player({ onToggleQueue, queueOpen }) {
                             <Play size={22} className="ml-0.5 fill-current" />
                         )}
                     </button>
+                    <IconButton icon={Sparkles} label="Autoplay similar songs" active={autoplay} onClick={toggleAutoplay} />
 
                     <IconButton icon={SkipForward} label="Next" size={22} onClick={playNext} />
                     <div className="hidden sm:block">

@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { useAuth } from './AuthContext'
-import { recordPlay } from '../services/api'
+import { recordPlay, getSimilarTracks } from '../services/api'
 import { useToast } from './ToastContext'
+
 
 const PlayerContext = createContext(null)
 
@@ -13,11 +14,15 @@ export function PlayerProvider({ children }) {
     const [repeatMode, setRepeatMode] = useState('off')
     const { user } = useAuth()
     const { toast } = useToast()
+    const [autoplay, setAutoplay] = useState(() => localStorage.getItem('sonic-autoplay') !== 'off')
+    const fetchingRef = useRef(false) // prevents duplicate recommendation requests
+    const seenRef = useRef(new Set()) // ids heard this session
 
     // NEW: a handle to the real <audio> element, plus time info copied from it
     const audioRef = useRef(null)
     const [progress, setProgress] = useState(0) // seconds played
     const [duration, setDuration] = useState(0) // total seconds
+
 
     // Volume from 0 to 1. The function form reads the saved value once at startup.
     const [volume, setVolumeState] = useState(() => {
@@ -113,6 +118,34 @@ export function PlayerProvider({ children }) {
         return () => clearTimeout(timer)
     }, [user, currentTrack, isPlaying])
 
+    // When the queue is nearly finished, append similar songs
+    useEffect(() => {
+        if (!currentTrack) return
+        seenRef.current.add(currentTrack.id)
+
+        const remaining = queue.length - currentIndex - 1
+        if (!autoplay || remaining > 2 || fetchingRef.current) return
+
+        fetchingRef.current = true
+        getSimilarTracks(currentTrack.id)
+            .then((list) => {
+                const inQueue = new Set(queue.map((t) => t.id))
+                const fresh = list
+                    .filter((t) => !inQueue.has(t.id) && !unavailable.has(t.id) && !seenRef.current.has(t.id))
+                    .sort(() => Math.random() - 0.5) // variety: same seed, different order
+                    .slice(0, 10)
+                    .map((t) => ({ ...t, recommended: true }))
+                if (fresh.length > 0) {
+                    setQueue((q) => [...q, ...fresh.filter((t) => !q.some((x) => x.id === t.id))])
+                }
+            })
+            .catch(() => { }) // recommendations are optional
+            .finally(() => {
+                fetchingRef.current = false
+            })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [autoplay, currentTrack?.id, queue.length, currentIndex])
+
     function playTrack(track, list = [track]) {
         const index = list.findIndex((t) => t.id === track.id)
         setQueue(list)
@@ -125,24 +158,57 @@ export function PlayerProvider({ children }) {
         setIsPlaying((prev) => !prev)
     }
 
-    function playNext() {
+    async function playNext() {
         if (queue.length === 0) return
 
+        // Shuffle: prefer songs not heard yet, start a fresh round when all are heard
         if (isShuffle && queue.length > 1) {
-            let random = currentIndex
-            while (random === currentIndex) {
-                random = Math.floor(Math.random() * queue.length)
+            let pool = queue.map((_, i) => i).filter((i) => i !== currentIndex && !seenRef.current.has(queue[i].id))
+            if (pool.length === 0) {
+                seenRef.current = new Set([queue[currentIndex].id])
+                pool = queue.map((_, i) => i).filter((i) => i !== currentIndex)
             }
-            setCurrentIndex(random)
-        } else {
-            const isLast = currentIndex === queue.length - 1
-            if (isLast && repeatMode === 'off') {
-                setIsPlaying(false)
-                return
-            }
-            setCurrentIndex((currentIndex + 1) % queue.length)
+            setCurrentIndex(pool[Math.floor(Math.random() * pool.length)])
+            setIsPlaying(true)
+            return
         }
-        setIsPlaying(true)
+
+        const isLast = currentIndex === queue.length - 1
+
+        // Not the last song: just move forward
+        if (!isLast) {
+            setCurrentIndex(currentIndex + 1)
+            setIsPlaying(true)
+            return
+        }
+
+        // Last song with repeat on: loop back to the start
+        if (repeatMode !== 'off') {
+            setCurrentIndex(0)
+            setIsPlaying(true)
+            return
+        }
+
+        // Last song with autoplay on: fetch similar songs and continue with them
+        if (autoplay && currentTrack) {
+            try {
+                const list = await getSimilarTracks(currentTrack.id)
+                const inQueue = new Set(queue.map((t) => t.id))
+                const fresh = list
+                    .filter((t) => !inQueue.has(t.id) && !unavailable.has(t.id))
+                    .map((t) => ({ ...t, recommended: true }))
+                if (fresh.length > 0) {
+                    setQueue([...queue, ...fresh])
+                    setCurrentIndex(queue.length) // first new song
+                    setIsPlaying(true)
+                    return
+                }
+            } catch {
+                // fall through: nothing to play next
+            }
+        }
+
+        setIsPlaying(false)
     }
 
     function playPrevious() {
@@ -182,6 +248,13 @@ export function PlayerProvider({ children }) {
 
     function toggleMute() {
         setIsMuted((prev) => !prev)
+    }
+
+    function toggleAutoplay() {
+        setAutoplay((prev) => {
+            localStorage.setItem('sonic-autoplay', prev ? 'off' : 'on')
+            return !prev
+        })
     }
 
     // NEW: called when a song finishes
@@ -250,6 +323,8 @@ export function PlayerProvider({ children }) {
         playFromQueue,
         currentIndex,
         unavailable,
+        autoplay,
+        toggleAutoplay,
     }
 
     return (

@@ -213,3 +213,40 @@ export async function searchAll(query) {
   }
   return { tracks: value(tracks), artists: value(artists), albums: value(albums) }
 }
+
+// Songs similar to a given track, found by shared genre tags
+export function getSimilarTracks(id, limit = 20) {
+  return cached(`similar:${id}:${limit}`, 600, async () => {
+    // Ask Jamendo for the seed track plus its tags
+    const [seed] = await request('tracks', { id, include: 'musicinfo', audioformat: 'mp31' })
+    if (!seed) return []
+
+    const tags = seed.musicinfo?.tags ?? {}
+    const wanted = [...(tags.genres ?? []).slice(0, 2), ...(tags.vartags ?? []).slice(0, 1)]
+
+    let results = []
+    if (wanted.length > 0) {
+      results = await request('tracks', {
+        fuzzytags: wanted.join('+'),
+        order: 'popularity_week',
+        limit: limit + 5,
+        imagesize: 400,
+        audioformat: 'mp31',
+      })
+    }
+    // Fallback when tags found little: more songs by the same artist
+    if (results.length < 5) {
+      results = await request('tracks', {
+        artist_id: seed.artist_id,
+        order: 'popularity_total',
+        limit: limit + 5,
+        imagesize: 400,
+        audioformat: 'mp31',
+      })
+    }
+    return results
+      .filter((t) => t.id !== String(id))
+      .slice(0, limit)
+      .map(normalizeTrack)
+  })
+}
