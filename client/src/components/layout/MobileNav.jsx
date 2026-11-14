@@ -21,8 +21,7 @@ function MobileNav() {
           end={to === '/'}
           // min-h-14 (56px) keeps the whole tab comfortably tappable
           className={({ isActive }) =>
-            `flex min-h-14 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors ${
-              isActive ? 'text-brand-400' : 'text-ink-300'
+            `flex min-h-14 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors ${isActive ? 'text-brand-400' : 'text-ink-300'
             }`
           }
         >
