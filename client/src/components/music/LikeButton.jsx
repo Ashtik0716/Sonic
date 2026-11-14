@@ -1,17 +1,21 @@
 import { Heart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useLikes } from '../../context/LikesContext'
+import { useToast } from '../../context/ToastContext'
 
 function LikeButton({ trackId, size = 18, className = '' }) {
   const { isLiked, toggleLike } = useLikes()
   const navigate = useNavigate()
   const liked = isLiked(trackId)
+  const { toast } = useToast()
+  const wasLiked = liked
+  
 
   async function handleClick(e) {
     e.stopPropagation() // don't trigger a parent's click (e.g. a row that plays the song)
     const ok = await toggleLike(trackId)
-    // Logged out: send them to log in
-    if (!ok) navigate('/login')
+if (!ok) navigate('/login')
+else toast(wasLiked ? 'Removed from Liked Songs' : 'Added to Liked Songs')
   }
 
   return (

@@ -1,6 +1,7 @@
 import { Play, Pause } from 'lucide-react'
 import { usePlayer } from '../../context/PlayerContext'
-import  LikeButton  from './LikeButton'
+import LikeButton from './LikeButton'
+import AddToPlaylist from './AddToPlaylist'
 
 function TrackCard({ track, list }) {
   const { currentTrack, isPlaying, playTrack, togglePlay } = usePlayer()
@@ -16,6 +17,7 @@ function TrackCard({ track, list }) {
     if (isCurrent) togglePlay()
     else playTrack(track, list)
   }
+  
 
   return (
     <div className="group w-36 shrink-0 cursor-pointer rounded-xl bg-surface-800 p-3 transition hover:bg-surface-700 md:w-44">
@@ -30,14 +32,18 @@ function TrackCard({ track, list }) {
           size={20}
           className="absolute left-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-surface-950/60 backdrop-blur"
         />
+        <div className="absolute right-2 top-2 rounded-full bg-surface-950/60 backdrop-blur">
+          <AddToPlaylist trackId={track.id} direction = "down"/>
+        </div>
         <button
           onClick={handleClick}
           aria-label={isThisPlaying ? `Pause ${track.title}` : `Play ${track.title}`}
           // Stays visible while this track is playing, otherwise appears on hover
-          className={`absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg transition hover:scale-105 ${isThisPlaying
-              ? 'translate-y-0 opacity-100'
-              : 'translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100'
-            }`}
+          className={`absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg transition hover:scale-105 ${
+  isThisPlaying
+    ? 'translate-y-0 opacity-100'
+    : 'opacity-100 md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100'
+}`}
         >
           {isThisPlaying ? (
             <Pause size={20} className="fill-current" />

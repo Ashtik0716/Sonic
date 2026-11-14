@@ -8,6 +8,8 @@ import { formatTime } from '../utils/formatTime'
 import { useState } from 'react'
 import NameModal from '../components/ui/NameModal'
 import ConfirmModal from '../components/ui/ConfirmModal'
+import { useToast } from '../context/ToastContext'
+
 
 
 function Playlist() {
@@ -17,6 +19,7 @@ function Playlist() {
   const { currentTrack, playTrack, togglePlay } = usePlayer()
   const { updateLocal, removeLocal } = usePlaylists()
   const [modal, setModal] = useState(null) // 'rename' | 'delete' | null
+  const { toast } = useToast()   // add near the other hooks, above early returns
 
   if (loading) return <p className="mt-6 text-ink-300">Loading...</p>
   if (error) return <p className="mt-6 text-ink-300">Could not load playlist: {error}</p>
@@ -40,7 +43,7 @@ function Playlist() {
       setTracks((tracks) => tracks.filter((t) => t.id !== trackId))
       updateLocal(id, { trackCount: playlist.tracks.length - 1 })
     } catch (err) {
-      window.alert(err.message)
+      toast(err.message, 'error')
     }
   }
 
@@ -61,11 +64,11 @@ function Playlist() {
           </button>
         )}
         <button onClick={() => setModal('rename')} aria-label="Rename" className="p-3 text-ink-300 hover:text-ink-100">
-  <Pencil size={20} />
-</button>
-<button onClick={() => setModal('delete')} aria-label="Delete playlist" className="p-3 text-ink-300 hover:text-red-400">
-  <Trash2 size={20} />
-</button>
+          <Pencil size={20} />
+        </button>
+        <button onClick={() => setModal('delete')} aria-label="Delete playlist" className="p-3 text-ink-300 hover:text-red-400">
+          <Trash2 size={20} />
+        </button>
         {modal === 'rename' && (
           <NameModal
             title="Rename playlist"
