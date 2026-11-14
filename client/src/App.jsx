@@ -10,6 +10,7 @@ import ProtectedRoute from './components/layout/ProtectedRoute'
 import LikedSongs from './pages/LikedSongs'
 import Playlist from './pages/Playlist'
 import Recent from './pages/Recent'
+import NotFound from './pages/NotFound'
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/artist/:id" element={<Artist />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/register" element={<Auth />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   )

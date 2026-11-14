@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Navbar from './Navbar'
 import Player from './Player'
@@ -9,6 +9,7 @@ import QueuePanel from './QueuePanel'
 
 function AppLayout() {
   const [queueOpen, setQueueOpen] = useState(false)
+  const location = useLocation()
   return (
     <div className="flex h-full flex-col bg-surface-950">
       <div className="flex min-h-0 flex-1 gap-2 md:p-2 md:pb-0">
@@ -18,7 +19,7 @@ function AppLayout() {
           <Navbar />
 
           {/* px-4 on phones, px-6 from md up */}
-          <div className="px-4 pb-6 md:px-6">
+          <div key={location.pathname} className="animate-fade-in px-4 pb-6 md:px-6">
             <ErrorBoundary>
               <Outlet />
             </ErrorBoundary>

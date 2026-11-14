@@ -20,6 +20,24 @@
   --color-ink-500: #6b6b80;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+    --animate-fade-in: fade-in 0.25s ease-out;
+  --animate-slide-in: slide-in 0.2s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Respect users who ask their system for less motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; }
 }
 
 /* Base styles applied to the whole page */

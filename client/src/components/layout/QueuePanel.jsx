@@ -7,7 +7,7 @@ function QueuePanel({ onClose }) {
   const upNext = queue.slice(currentIndex + 1)
 
   return (
-    <aside className="fixed bottom-24 right-2 top-2 z-30 flex w-80 max-w-[calc(100vw-1rem)] flex-col rounded-xl bg-surface-800 shadow-2xl md:bottom-28">
+    <aside className="fixed bottom-24 right-2 top-2 z-30 flex w-80 max-w-[calc(100vw-1rem)] flex-col rounded-xl bg-surface-800 shadow-2xl md:bottom-28 animate-slide-in">
       <div className="flex items-center justify-between p-4">
         <h2 className="text-lg font-bold">Queue</h2>
         <button onClick={onClose} aria-label="Close queue" className="text-ink-300 hover:text-ink-100">
