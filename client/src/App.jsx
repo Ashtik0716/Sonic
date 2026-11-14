@@ -1,8 +1,7 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
 import Home from './pages/Home'
 import Search from './pages/Search'
-import Library from './pages/Library'
 import Album from './pages/Album'
 import Artist from './pages/Artist'
 import Auth from './pages/Auth'
@@ -11,6 +10,7 @@ import LikedSongs from './pages/LikedSongs'
 import Playlist from './pages/Playlist'
 import Recent from './pages/Recent'
 import NotFound from './pages/NotFound'
+import Playlists from './pages/Playlists'
 
 function App() {
   return (
@@ -20,13 +20,13 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/library" element={<Library />} />
+          <Route path="/library" element={<Navigate to="/library/liked" replace />} />
           <Route path="/library/liked" element={<LikedSongs />} />
+          <Route path="/library/playlists" element={<Playlists />} />
           <Route path="/library/recent" element={<Recent />} />
-          <Route path="/library/*" element={<Library />} />
+          <Route path="/library/*" element={<Navigate to="/library/liked" replace />} />
           <Route path="/playlist/:id" element={<Playlist />} />
         </Route>
-        <Route path="/library/*" element={<Library />} />
         <Route path="/album/:id" element={<Album />} />
         <Route path="/artist/:id" element={<Artist />} />
         <Route path="/login" element={<Auth />} />

@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Search, Library } from 'lucide-react'
+import { Home, Search, Heart, ListMusic, Clock } from 'lucide-react'
 
-// Same data-driven idea as the Sidebar
 const tabs = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/search', icon: Search, label: 'Search' },
-  { to: '/library', icon: Library, label: 'Library' },
+  { to: '/library/liked', icon: Heart, label: 'Liked' },
+  { to: '/library/playlists', icon: ListMusic, label: 'Playlists' },
+  { to: '/library/recent', icon: Clock, label: 'Recent' },
 ]
 
 function MobileNav() {

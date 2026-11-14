@@ -12,7 +12,6 @@ const mainLinks = [
 ]
 
 const libraryLinks = [
-  { to: '/library', icon: Library, label: 'Your Library' },
   { to: '/library/liked', icon: Heart, label: 'Liked Songs' },
   { to: '/library/playlists', icon: ListMusic, label: 'Playlists' },
   { to: '/library/recent', icon: Clock, label: 'Recently Played' },

@@ -34,7 +34,7 @@ function Playlist() {
   async function handleDelete() {
     await deletePlaylist(id)
     removeLocal(id)
-    navigate('/library')
+    navigate('/library/playlists')
   }
 
   async function handleRemoveTrack(trackId) {
