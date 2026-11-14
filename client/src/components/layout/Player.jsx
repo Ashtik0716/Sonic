@@ -22,7 +22,7 @@ function IconButton({ icon: Icon, label, active = false, size = 20, onClick }) {
     )
 }
 
-function Player() {
+function Player({ onToggleQueue, queueOpen }) {
     // Read shared state from context instead of keeping our own
     const {
         currentTrack,
@@ -150,7 +150,7 @@ function Player() {
             {/* RIGHT: queue + volume (hidden on mobile) */}
             {/* RIGHT: queue + volume (hidden on mobile) */}
             <div className="hidden items-center justify-end gap-2 md:flex">
-                <IconButton icon={ListMusic} label="Queue" />
+                <IconButton icon={ListMusic} label="Queue" active={queueOpen} onClick={onToggleQueue} />
                 <IconButton
                     icon={VolumeIcon}
                     label={isMuted ? 'Unmute' : 'Mute'}

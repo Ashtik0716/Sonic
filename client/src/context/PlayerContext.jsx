@@ -94,14 +94,14 @@ export function PlayerProvider({ children }) {
     }, [progress, duration])
 
     // Record a play once the track has been playing for 5 seconds
-useEffect(() => {
-  if (!user || !currentTrack || !isPlaying) return
-  const timer = setTimeout(() => {
-    recordPlay(currentTrack.id).catch(() => {}) // history is nice-to-have; ignore failures
-  }, 5000)
-  // Skipping or pausing before 5s cancels the timer
-  return () => clearTimeout(timer)
-}, [user, currentTrack, isPlaying])
+    useEffect(() => {
+        if (!user || !currentTrack || !isPlaying) return
+        const timer = setTimeout(() => {
+            recordPlay(currentTrack.id).catch(() => { }) // history is nice-to-have; ignore failures
+        }, 5000)
+        // Skipping or pausing before 5s cancels the timer
+        return () => clearTimeout(timer)
+    }, [user, currentTrack, isPlaying])
 
     function playTrack(track, list = [track]) {
         const index = list.findIndex((t) => t.id === track.id)
@@ -138,6 +138,13 @@ useEffect(() => {
     function playPrevious() {
         if (queue.length === 0) return
         setCurrentIndex((currentIndex - 1 + queue.length) % queue.length)
+        setIsPlaying(true)
+    }
+
+    // Jump to a specific position in the current queue
+    function playFromQueue(index) {
+        if (index < 0 || index >= queue.length) return
+        setCurrentIndex(index)
         setIsPlaying(true)
     }
 
@@ -198,6 +205,8 @@ useEffect(() => {
         seek,
         setVolume,
         toggleMute,
+        playFromQueue,
+        currentIndex
     }
 
     return (
