@@ -8,21 +8,24 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import { LikesProvider } from './context/LikesContext.jsx'
 import { PlaylistsProvider } from './context/PlaylistContext.jsx'
 import ErrorBoundary from './components/layout/ErrorBoundary.jsx'
+import { ModalProvider } from './context/ModalContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-    <BrowserRouter>
-      <AuthProvider>
-        <LikesProvider>
-          <PlaylistsProvider>
-            <PlayerProvider>
-              <App />
-            </PlayerProvider>
-          </PlaylistsProvider>
-        </LikesProvider>
-      </AuthProvider>
-    </BrowserRouter>
+      <BrowserRouter>
+      <ModalProvider>
+        <AuthProvider>
+          <LikesProvider>
+            <PlaylistsProvider>
+              <PlayerProvider>
+                <App />
+              </PlayerProvider>
+            </PlaylistsProvider>
+          </LikesProvider>
+        </AuthProvider>
+        </ModalProvider>
+      </BrowserRouter>
     </ErrorBoundary>
   </StrictMode>,
 )

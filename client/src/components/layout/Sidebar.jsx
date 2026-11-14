@@ -3,6 +3,8 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import SidebarLink from './SidebarLink'
 import { useAuth } from '../../context/AuthContext'
 import { usePlaylists } from '../../context/PlaylistContext'
+import { useState } from 'react'
+import NameModal from '../ui/NameModal'
 
 const mainLinks = [
   { to: '/', icon: Home, label: 'Home' },
@@ -20,18 +22,12 @@ function Sidebar() {
   const { user } = useAuth()
   const { playlists, create } = usePlaylists()
   const navigate = useNavigate()
+  const [creating, setCreating] = useState(false)
 
   // Ask for a name, create the playlist, then open it
-  async function handleCreate() {
+  function handleCreateClick() {
     if (!user) return navigate('/login')
-    const name = window.prompt('Playlist name')
-    if (!name?.trim()) return
-    try {
-      const playlist = await create(name.trim())
-      navigate(`/playlist/${playlist.id}`)
-    } catch (err) {
-      window.alert(err.message)
-    }
+    setCreating(true)
   }
 
   return (
@@ -58,7 +54,7 @@ function Sidebar() {
         <div className="mb-2 flex items-center justify-between px-3">
           <p className="text-sm font-semibold uppercase tracking-wider text-ink-500">Library</p>
           <button
-            onClick={handleCreate}
+            onClick={handleCreateClick}
             aria-label="Create playlist"
             className="rounded-full p-1 text-ink-300 transition hover:bg-surface-700 hover:text-ink-100"
           >
@@ -83,8 +79,7 @@ function Sidebar() {
                 key={p.id}
                 to={`/playlist/${p.id}`}
                 className={({ isActive }) =>
-                  `block truncate rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive ? 'text-brand-400' : 'text-ink-300 hover:text-ink-100'
+                  `block truncate rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive ? 'text-brand-400' : 'text-ink-300 hover:text-ink-100'
                   }`
                 }
               >
@@ -94,6 +89,17 @@ function Sidebar() {
           </div>
         )}
       </div>
+      {creating && (
+        <NameModal
+          title="Create playlist"
+          submitLabel="Create"
+          onClose={() => setCreating(false)}
+          onSubmit={async (name) => {
+            const playlist = await create(name)
+            navigate(`/playlist/${playlist.id}`)
+          }}
+        />
+      )}
     </aside>
   )
 }

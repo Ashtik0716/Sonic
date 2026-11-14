@@ -5,6 +5,10 @@ import { usePlayer } from '../context/PlayerContext'
 import { usePlaylists } from '../context/PlaylistContext'
 import { renamePlaylist, deletePlaylist, removeFromPlaylist } from '../services/api'
 import { formatTime } from '../utils/formatTime'
+import { useState } from 'react'
+import NameModal from '../components/ui/NameModal'
+import ConfirmModal from '../components/ui/ConfirmModal'
+
 
 function Playlist() {
   const { id } = useParams()
@@ -12,32 +16,22 @@ function Playlist() {
   const { playlist, loading, error, setTracks, setName } = usePlaylist(id)
   const { currentTrack, playTrack, togglePlay } = usePlayer()
   const { updateLocal, removeLocal } = usePlaylists()
+  const [modal, setModal] = useState(null) // 'rename' | 'delete' | null
 
   if (loading) return <p className="mt-6 text-ink-300">Loading...</p>
   if (error) return <p className="mt-6 text-ink-300">Could not load playlist: {error}</p>
   if (!playlist) return null
 
-  async function handleRename() {
-    const name = window.prompt('New name', playlist.name)
-    if (!name?.trim() || name.trim() === playlist.name) return
-    try {
-      await renamePlaylist(id, name.trim())
-      setName(name.trim())
-      updateLocal(id, { name: name.trim() })
-    } catch (err) {
-      window.alert(err.message)
-    }
+  async function handleRename(name) {
+    await renamePlaylist(id, name)
+    setName(name)
+    updateLocal(id, { name })
   }
 
   async function handleDelete() {
-    if (!window.confirm(`Delete "${playlist.name}"?`)) return
-    try {
-      await deletePlaylist(id)
-      removeLocal(id)
-      navigate('/library')
-    } catch (err) {
-      window.alert(err.message)
-    }
+    await deletePlaylist(id)
+    removeLocal(id)
+    navigate('/library')
   }
 
   async function handleRemoveTrack(trackId) {
@@ -66,12 +60,28 @@ function Playlist() {
             <Play size={26} className="ml-1 fill-current" />
           </button>
         )}
-        <button onClick={handleRename} aria-label="Rename" className="p-3 text-ink-300 hover:text-ink-100">
-          <Pencil size={20} />
-        </button>
-        <button onClick={handleDelete} aria-label="Delete playlist" className="p-3 text-ink-300 hover:text-red-400">
-          <Trash2 size={20} />
-        </button>
+        <button onClick={() => setModal('rename')} aria-label="Rename" className="p-3 text-ink-300 hover:text-ink-100">
+  <Pencil size={20} />
+</button>
+<button onClick={() => setModal('delete')} aria-label="Delete playlist" className="p-3 text-ink-300 hover:text-red-400">
+  <Trash2 size={20} />
+</button>
+        {modal === 'rename' && (
+          <NameModal
+            title="Rename playlist"
+            initialValue={playlist.name}
+            onSubmit={handleRename}
+            onClose={() => setModal(null)}
+          />
+        )}
+        {modal === 'delete' && (
+          <ConfirmModal
+            title="Delete playlist?"
+            message={`"${playlist.name}" will be permanently deleted.`}
+            onConfirm={handleDelete}
+            onClose={() => setModal(null)}
+          />
+        )}
       </div>
 
       {playlist.tracks.length === 0 ? (
