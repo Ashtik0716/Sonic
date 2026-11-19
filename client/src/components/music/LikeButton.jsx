@@ -9,13 +9,13 @@ function LikeButton({ trackId, size = 18, className = '' }) {
   const liked = isLiked(trackId)
   const { toast } = useToast()
   const wasLiked = liked
-  
+
 
   async function handleClick(e) {
     e.stopPropagation() // don't trigger a parent's click (e.g. a row that plays the song)
     const ok = await toggleLike(trackId)
-if (!ok) navigate('/login')
-else toast(wasLiked ? 'Removed from Liked Songs' : 'Added to Liked Songs')
+    if (!ok) navigate('/login')
+    else toast(wasLiked ? 'Removed from Liked Songs' : 'Added to Liked Songs')
   }
 
   return (

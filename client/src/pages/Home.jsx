@@ -19,8 +19,8 @@ function getGreeting() {
 
 function Home() {
   const { playTrack, unavailable } = usePlayer()
-const { tracks: allTracks, loading, error, retry } = useTrending(20)
-const tracks = allTracks.filter((t) => !unavailable.has(t.id))
+  const { tracks: allTracks, loading, error, retry } = useTrending(20)
+  const tracks = allTracks.filter((t) => !unavailable.has(t.id))
   const { albums, loading: albumsLoading } = usePopularAlbums()
   const { artists, loading: artistsLoading } = usePopularArtists()
   const { tracks: recent } = useHistory()

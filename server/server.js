@@ -10,6 +10,7 @@ import likeRoutes from './routes/likeRoutes.js'
 import playlistRoutes from './routes/playlistRoutes.js'
 import historyRoutes from './routes/historyRoutes.js'
 import searchRoutes from './routes/searchRoutes.js'
+import { authLimiter, apiLimiter } from './middleware/rateLimit.js'
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -19,14 +20,21 @@ const PORT = process.env.PORT || 5000
 app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' })) // allow requests from the frontend
 app.use(express.json()) // parse JSON request bodies (needed later for login)
 // Everything in trackRoutes lives under /api/tracks
+
+// Render sits behind a proxy; without this every user looks like the same IP
+app.set('trust proxy', 1)
+app.use('/api', apiLimiter)
 app.use('/api/tracks', trackRoutes)
 app.use('/api/albums', albumRoutes)
 app.use('/api/artists', artistRoutes)
+app.use('/api/auth/login', authLimiter)
+app.use('/api/auth/register', authLimiter)
 app.use('/api/auth', authRoutes)
 app.use('/api/likes', likeRoutes)
 app.use('/api/playlists', playlistRoutes)
 app.use('/api/history', historyRoutes)
 app.use('/api/search', searchRoutes)
+
 
 // A route: GET /api/health -> JSON response
 app.get('/api/health', (req, res) => {
@@ -36,10 +44,6 @@ app.get('/api/health', (req, res) => {
 // Connect to the database first; only start listening if it works
 connectDB()
   .then(() => {
-    import('./models/User.js').then(async ({ default: User }) => {
-      const count = await User.countDocuments()
-      console.log('Users in database:', count)
-    })
     app.listen(PORT, () => {
       console.log(`Sonic API running on http://localhost:${PORT}`)
     })
