@@ -18,8 +18,12 @@ const userSchema = new mongoose.Schema(
     // A bcrypt hash, never the real password
     passwordHash: {
       type: String,
-      required: true,
-      select: false, // hidden from queries unless we ask for it
+      select: false, // no longer required: Google users have none
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // allows many users with no googleId
     },
     // Track ids (Jamendo ids are strings) the user has liked
     likedTracks: [{ type: String }],

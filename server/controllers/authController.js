@@ -47,6 +47,7 @@ export async function register(req, res) {
 // POST /api/auth/login
 export async function login(req, res) {
   const { email, password } = req.body
+
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' })
   }
@@ -57,7 +58,7 @@ export async function login(req, res) {
 
     // Same message for "no such user" and "wrong password", so attackers can't
     // discover which emails are registered
-    const valid = user && (await bcrypt.compare(password, user.passwordHash))
+    const valid = user && user.passwordHash && (await bcrypt.compare(password, user.passwordHash))
     if (!valid) {
       return res.status(401).json({ message: 'Invalid email or password' })
     }
