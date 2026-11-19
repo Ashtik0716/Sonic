@@ -1,7 +1,9 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
+import { OAuth2Client } from 'google-auth-library'
 
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
 // Create a signed token containing the user's id
 function signToken(userId) {
@@ -73,4 +75,44 @@ export async function login(req, res) {
 // GET /api/auth/me  (protected): returns the logged-in user
 export function me(req, res) {
   res.json({ user: publicUser(req.user) })
+}
+
+// POST /api/auth/google  { credential }
+export async function googleLogin(req, res) {
+  const { credential } = req.body
+  if (!credential) return res.status(400).json({ message: 'Missing Google credential' })
+
+  try {
+    // Throws if the token is forged, expired, or meant for another app
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    })
+    const payload = ticket.getPayload()
+
+    // Only trust emails that Google has verified
+    if (!payload.email_verified) {
+      return res.status(401).json({ message: 'Google email is not verified' })
+    }
+
+    const email = payload.email.toLowerCase()
+    let user = await User.findOne({ $or: [{ googleId: payload.sub }, { email }] })
+
+    if (!user) {
+      user = await User.create({
+        name: payload.name || email.split('@')[0],
+        email,
+        googleId: payload.sub,
+      })
+    } else if (!user.googleId) {
+      // Existing email/password account: link it to this Google identity
+      user.googleId = payload.sub
+      await user.save()
+    }
+
+    res.json({ token: signToken(user._id), user: publicUser(user) })
+  } catch (err) {
+    console.error('Google login failed:', err.message)
+    res.status(401).json({ message: 'Google sign-in failed' })
+  }
 }
