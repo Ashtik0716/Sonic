@@ -224,6 +224,24 @@ export function PlayerProvider({ children }) {
         setIsPlaying(true)
     }
 
+    // Move an upcoming song within the queue (indexes are positions in `queue`)
+    // Move an upcoming song, identified by track id, to where another one sits
+    function moveInQueue(activeId, overId) {
+        setQueue((q) => {
+            const from = q.findIndex((t) => t.id === activeId)
+            const to = q.findIndex((t) => t.id === overId)
+            const playingId = q[currentIndex]?.id
+            // Only songs after the current one may move
+            if (from <= currentIndex || to <= currentIndex || from === to) return q
+            const next = [...q]
+            const [moved] = next.splice(from, 1)
+            next.splice(to, 0, moved)
+            // Keep currentIndex pointing at the same playing song
+            setCurrentIndex(next.findIndex((t) => t.id === playingId))
+            return next
+        })
+    }
+
     function toggleShuffle() {
         setIsShuffle((prev) => !prev)
     }
@@ -325,6 +343,10 @@ export function PlayerProvider({ children }) {
         unavailable,
         autoplay,
         toggleAutoplay,
+        playFromQueue,
+        moveInQueue,
+        currentIndex,
+        unavailable,
     }
 
     return (
