@@ -19,11 +19,13 @@ phone as a PWA.
 - **Discovery:** trending tracks, popular albums and featured artists
 - **Search:** songs, artists and albums with tabs; the query lives in the URL
 - **Player:** queue, shuffle, repeat, seek, volume and persistent playback across pages
-- **Autoplay:** when the queue ends, similar songs are fetched and played
+- **Autoplay:** when the queue ends, similar songs are found by genre tags and played
+- **Smart shuffle:** plays every song once before repeating any
 - **Lock-screen controls** through the Media Session API
-- **Accounts:** register and login with JWT authentication and protected routes
+- **Accounts:** email/password and Sign in with Google (OAuth), JWT sessions, protected routes
 - **Library:** liked songs, playlists and recently played history
 - **Resilience:** unplayable tracks are detected, removed from the queue and hidden
+- **Security:** bcrypt password hashing, rate limiting, strict CORS, ownership checks
 - **Responsive and installable:** mobile tab bar, PWA with offline app shell
 
 ## Tech stack
@@ -33,7 +35,7 @@ phone as a PWA.
 | Frontend | React, Vite, Tailwind CSS v4, React Router, Context API |
 | Backend | Node.js, Express, Mongoose |
 | Database | MongoDB Atlas |
-| Auth | JWT, bcrypt |
+| Auth | JWT, bcrypt, Google Identity Services |
 | Music data | Jamendo API (Creative Commons) |
 | PWA | vite-plugin-pwa |
 | Hosting | Vercel (client), Render (server) |
@@ -49,18 +51,22 @@ Browser (React) --> Express API --> Jamendo API
 - All secrets, including the Jamendo key, stay on the server.
 - The API caches Jamendo responses in memory to keep pages fast.
 - The server follows a route, controller, service structure.
+- Google ID tokens are verified on the server; the app then issues its own JWT,
+  so email and Google logins share one session system.
 - Playlist queries always filter by owner, so users cannot access each other's data.
 - Likes use idempotent `PUT` and `DELETE` routes, and the UI updates optimistically
   with rollback on failure.
+- Login and register routes are rate limited per IP.
 
 ## Run locally
 
 Requirements: Node.js 20+, a free [MongoDB Atlas](https://www.mongodb.com/atlas)
-cluster and a free [Jamendo API](https://devportal.jamendo.com) client ID.
+cluster, a free [Jamendo API](https://devportal.jamendo.com) client ID, and
+(optional) a Google OAuth web client ID.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/sonic.git
-cd sonic
+git clone https://github.com/Ashtik0716/Sonic.git
+cd Sonic
 
 # Backend
 cd server
@@ -71,12 +77,15 @@ npm run dev
 # Frontend (in a second terminal)
 cd client
 npm install
+cp .env.example .env      # optional: Google client ID
 npm run dev
 ```
 
 Open http://localhost:5173. The Vite dev server proxies `/api` to the backend.
 
-### Environment variables (`server/.env`)
+### Environment variables
+
+**`server/.env`**
 
 | Variable | Purpose |
 |---|---|
@@ -85,14 +94,21 @@ Open http://localhost:5173. The Vite dev server proxies `/api` to the backend.
 | `JWT_EXPIRES_IN` | Token lifetime, for example `7d` |
 | `JAMENDO_CLIENT_ID` | Jamendo API client ID |
 | `CLIENT_URL` | Allowed frontend origin for CORS |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID (for token verification) |
 
-In production, the client reads `VITE_API_URL` (the backend address).
+**`client/.env`**
+
+| Variable | Purpose |
+|---|---|
+| `VITE_GOOGLE_CLIENT_ID` | Same Google client ID (public; shows the button) |
+| `VITE_API_URL` | Backend address, needed in production only |
+
 
 ## API overview
 
 | Route | Description |
 |---|---|
-| `POST /api/auth/register`, `POST /api/auth/login` | Create account / log in |
+| `POST /api/auth/register`, `/login`, `/google` | Create account, log in, Google sign-in |
 | `GET /api/auth/me` | Current user (protected) |
 | `GET /api/tracks/trending`, `GET /api/search?q=` | Discovery and search |
 | `GET /api/tracks/:id/similar` | Recommendations for autoplay |
@@ -108,16 +124,17 @@ from the labels.
 ## What I learned
 
 - Designing a REST API with layered structure and input validation
-- Password hashing and JWT authentication, plus route guards on the client
+- Password hashing, JWTs, and OAuth token verification with Google
 - Authorisation checks that prevent users from touching each other's data
 - Global state with React Context (player, auth, likes, playlists)
 - Optimistic updates, debounced search and URL-driven state
-- In-memory caching and handling unreliable third-party data
+- In-memory caching, rate limiting and handling unreliable third-party data
 - Building a PWA and deploying across Vercel, Render and Atlas (including CORS)
 
 ## Roadmap
 
-- Sign in with Google
-- Rate limiting and automated tests
+- Automated tests (Vitest, Supertest)
+- "Made for you" recommendations based on liked songs
+- Drag-and-drop queue reordering
 - "Made for you" recommendations based on liked songs
 - Drag-and-drop queue reordering
