@@ -124,3 +124,7 @@ export function googleLoginUser(credential) {
     body: JSON.stringify({ credential }),
   })
 }
+
+export function getRecommendations() {
+  return request('/api/recommendations')
+}

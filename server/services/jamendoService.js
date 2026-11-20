@@ -250,3 +250,24 @@ export function getSimilarTracks(id, limit = 20) {
       .map(normalizeTrack)
   })
 }
+
+// Merge "similar songs" for several seed tracks into one list
+export async function getRecommendations(seedIds, excludeIds, limit = 20) {
+  // allSettled: if one seed fails, the others still count
+  const settled = await Promise.allSettled(seedIds.map((id) => getSimilarTracks(id, 15)))
+  const exclude = new Set(excludeIds.map(String))
+  const seen = new Set()
+  const merged = []
+
+  for (const r of settled) {
+    if (r.status !== 'fulfilled') continue
+    for (const t of r.value) {
+      if (exclude.has(t.id) || seen.has(t.id)) continue
+      seen.add(t.id)
+      merged.push(t)
+    }
+  }
+  // Shuffle so no single seed dominates the row
+  merged.sort(() => Math.random() - 0.5)
+  return merged.slice(0, limit)
+}

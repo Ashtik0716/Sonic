@@ -11,6 +11,7 @@ import playlistRoutes from './routes/playlistRoutes.js'
 import historyRoutes from './routes/historyRoutes.js'
 import searchRoutes from './routes/searchRoutes.js'
 import { authLimiter, apiLimiter } from './middleware/rateLimit.js'
+import recommendationRoutes from './routes/recommendationRoutes.js'
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -35,6 +36,7 @@ app.use('/api/likes', likeRoutes)
 app.use('/api/playlists', playlistRoutes)
 app.use('/api/history', historyRoutes)
 app.use('/api/search', searchRoutes)
+app.use('/api/recommendations', recommendationRoutes)
 
 
 // A route: GET /api/health -> JSON response

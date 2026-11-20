@@ -9,6 +9,7 @@ import { useTrending } from '../hooks/useTrending'
 import { usePopularAlbums } from '../hooks/usePopularAlbums'
 import { usePopularArtists } from '../hooks/usePopularArtists'
 import { useHistory } from '../hooks/useHistory'
+import { useMadeForYou } from '../hooks/useMadeForYou'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -24,6 +25,8 @@ function Home() {
   const { albums, loading: albumsLoading } = usePopularAlbums()
   const { artists, loading: artistsLoading } = usePopularArtists()
   const { tracks: recent } = useHistory()
+  const { tracks: madeForYou, loading: madeLoading } = useMadeForYou()
+  const picks = madeForYou.filter((t) => !unavailable.has(t.id))
 
   // First six real tracks become the quick picks
   const quickPicks = tracks.slice(0, 6)
@@ -68,6 +71,13 @@ function Home() {
           {recent.slice(0, 10).map((track) => (
             <TrackCard key={track.id} track={track} list={recent} />
           ))}
+        </Section>
+      )}
+      {(madeLoading || picks.length > 0) && (
+        <Section title="Made for you">
+          {madeLoading
+            ? Array.from({ length: 6 }, (_, i) => <TrackCardSkeleton key={i} />)
+            : picks.map((track) => <TrackCard key={track.id} track={track} list={picks} />)}
         </Section>
       )}
 
