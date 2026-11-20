@@ -136,5 +136,3 @@ from the labels.
 - Automated tests (Vitest, Supertest)
 - "Made for you" recommendations based on liked songs
 - Drag-and-drop queue reordering
-- "Made for you" recommendations based on liked songs
-- Drag-and-drop queue reordering
