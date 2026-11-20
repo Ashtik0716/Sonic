@@ -149,3 +149,11 @@ from the labels.
 ## Roadmap
 
 - Drag-and-drop queue reordering
+
+## License
+
+| Item | Licence |
+|---|---|
+| Sonic source code | [MIT](LICENSE) |
+| Music (via Jamendo) | Creative Commons, varies per track (mostly non-commercial) |
+| Artwork and audio | Owned by their respective artists |
