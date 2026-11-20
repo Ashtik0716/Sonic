@@ -27,7 +27,8 @@ phone as a PWA.
 - **Resilience:** unplayable tracks are detected, removed from the queue and hidden
 - **Security:** bcrypt password hashing, rate limiting, strict CORS, ownership checks
 - **Responsive and installable:** mobile tab bar, PWA with offline app shell
-- **Made for you:** a Home row built from your liked and recent songs, merged from similar-track lookups
+- **Reorderable queue:** drag songs in the queue panel (mouse, touch and keyboard)
+- **Made for you:** a Home row built from your liked and recent songs
 
 ## Tech stack
 
@@ -128,6 +129,7 @@ cd client && npm test   # utility and component tests (Vitest, Testing Library)
 | `GET /api/tracks/:id/similar` | Recommendations for autoplay |
 | `GET /api/albums/:id`, `GET /api/artists/:id` | Album and artist pages |
 | `/api/likes`, `/api/playlists`, `/api/history` | User data (protected) |
+| `GET /api/recommendations` | "Made for you" tracks (protected) |
 
 
 ## Music licensing
@@ -148,7 +150,9 @@ from the labels.
 
 ## Roadmap
 
-- Drag-and-drop queue reordering
+- Indian and regional music rows (Jamendo tags)
+- Share playlists via public links
+- End-to-end tests (Playwright)
 
 ## License
 
