@@ -27,6 +27,7 @@ phone as a PWA.
 - **Resilience:** unplayable tracks are detected, removed from the queue and hidden
 - **Security:** bcrypt password hashing, rate limiting, strict CORS, ownership checks
 - **Responsive and installable:** mobile tab bar, PWA with offline app shell
+- **Made for you:** a Home row built from your liked and recent songs, merged from similar-track lookups
 
 ## Tech stack
 
