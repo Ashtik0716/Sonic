@@ -59,6 +59,12 @@ Browser (React) --> Express API --> Jamendo API
   with rollback on failure.
 - Login and register routes are rate limited per IP.
 
+## Known limitations
+- Recommendations use genre tags and popularity, not personalised ML
+- Free-tier backend sleeps when idle
+- Only Creative Commons music from Jamendo is available
+- Google sign-in is limited to test users
+
 ## Run locally
 
 Requirements: Node.js 20+, a free [MongoDB Atlas](https://www.mongodb.com/atlas)
@@ -83,6 +89,13 @@ npm run dev
 ```
 
 Open http://localhost:5173. The Vite dev server proxies `/api` to the backend.
+
+## Tests
+
+```bash
+cd server && npm test   # auth API tests (Vitest, Supertest, in-memory MongoDB)
+cd client && npm test   # utility and component tests (Vitest, Testing Library)
+```
 
 ### Environment variables
 
@@ -116,6 +129,7 @@ Open http://localhost:5173. The Vite dev server proxies `/api` to the backend.
 | `GET /api/albums/:id`, `GET /api/artists/:id` | Album and artist pages |
 | `/api/likes`, `/api/playlists`, `/api/history` | User data (protected) |
 
+
 ## Music licensing
 
 Sonic plays independent music from Jamendo under Creative Commons licences.
@@ -134,5 +148,4 @@ from the labels.
 
 ## Roadmap
 
-- Automated tests (Vitest, Supertest)
 - Drag-and-drop queue reordering

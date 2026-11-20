@@ -32,4 +32,9 @@ export default defineConfig({
   server: {
     proxy: { '/api': 'http://localhost:5000' },
   },
+  test: {
+  environment: 'jsdom',   // a fake browser for components
+  globals: true,
+  setupFiles: './src/tests/setup.js',
+},
 })
