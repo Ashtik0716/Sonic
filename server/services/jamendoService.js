@@ -163,16 +163,28 @@ export function getArtist(id) {
   })
 }
 
-// Look up many tracks at once by id (Jamendo accepts ids joined with "+")
 export async function getTracksByIds(ids) {
   if (ids.length === 0) return []
-  const results = await request('tracks', {
-    id: ids.join('+'),
-    limit: ids.length,
-    imagesize: 400,
-    audioformat: 'mp31',
-  })
-  return results.map(normalizeTrack)
+  const batches = []
+  for (let i = 0; i < ids.length; i += 10) batches.push(ids.slice(i, i + 10))
+
+  const settled = await Promise.allSettled(
+    batches.map((batch) =>
+      request('tracks', {
+        id: batch.join('+'),
+        limit: batch.length,
+        imagesize: 400,
+        audioformat: 'mp31',
+      })
+    )
+  )
+
+  const tracks = []
+  for (const r of settled) {
+    if (r.status === 'fulfilled') tracks.push(...r.value.map(normalizeTrack))
+    else console.error('Track lookup batch failed:', r.reason?.message)
+  }
+  return tracks
 }
 
 // Search artists by name
