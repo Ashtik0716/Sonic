@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import GoogleButton from '../components/ui/GoogleButton'
 
 function Auth() {
     const isRegister = useLocation().pathname === '/register'
-    const { login, register } = useAuth()
+    const { login, register, googleLogin } = useAuth()
     const navigate = useNavigate()
 
     const [name, setName] = useState('')
@@ -14,6 +15,7 @@ function Auth() {
     const [submitting, setSubmitting] = useState(false)
     const location = useLocation()
     const from = location.state?.from ?? '/'
+
 
     async function handleSubmit(e) {
         e.preventDefault() // stop the browser's default page reload
@@ -27,6 +29,16 @@ function Auth() {
             setError(err.message)
         } finally {
             setSubmitting(false)
+        }
+    }
+
+    async function handleGoogle(credential) {
+        setError(null)
+        try {
+            await googleLogin(credential)
+            navigate(from, { replace: true })
+        } catch (err) {
+            setError(err.message)
         }
     }
 
@@ -77,6 +89,10 @@ function Auth() {
                     {submitting ? 'Please wait...' : isRegister ? 'Sign up' : 'Log in'}
                 </button>
             </form>
+            <div className="my-6 flex items-center gap-3 text-xs text-ink-500">
+                <span className="h-px flex-1 bg-surface-600" /> OR <span className="h-px flex-1 bg-surface-600" />
+            </div>
+            <GoogleButton onCredential={handleGoogle} />
 
             <p className="mt-6 text-sm text-ink-300">
                 {isRegister ? 'Already have an account? ' : "Don't have an account? "}

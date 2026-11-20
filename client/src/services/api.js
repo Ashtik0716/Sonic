@@ -117,3 +117,10 @@ export function searchAll(query) {
 export function getSimilarTracks(id) {
   return request(`/api/tracks/${id}/similar`)
 }
+
+export function googleLoginUser(credential) {
+  return request('/api/auth/google', {}, {
+    method: 'POST',
+    body: JSON.stringify({ credential }),
+  })
+}
